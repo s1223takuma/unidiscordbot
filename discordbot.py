@@ -14,47 +14,13 @@ client = commands.Bot(command_prefix="!",intents=intents)
 invite = None
 
 
-
-
 # 起動時に動作する処理
 @client.event
 async def on_ready():
     # 起動したらターミナルにログイン通知が表示される
-    c = Loops()
-    c.check_time.start()
     print('ログインしました')
 
-class Loops:
-    @tasks.loop(seconds=3600)
-    async def check_time(self):
-        global invite
-        channels = client.get_channel(1118169853606502443)
-        if invite == None:
-            invite = invite = await channels.create_invite(max_age = 7 * 24 * 3600)
-        invite = invite
-        target_time = time(12)
-        now = datetime.now().time()
-        print(now)
-        print(target_time)
-        if str(now)[0:2] == str(target_time)[0:2]:
-            invite = await channels.create_invite(max_age = 24 * 3600)
-            print(invite.url)
-            # Google Apps Scriptにデータを送信
-            try:
-                payload = {'inviteLink': invite.url}
-                response = requests.post("https://script.google.com/macros/s/AKfycbzC0g3AQuklpnXw-6iP36xP5wG2ZxrG6QXADkSNWXOfvDt_upIHUTKChCe_dpGBpmZqOA/exec", params=payload)
-                
-                if response.status_code == 200:
-                    adminchannel = client.get_channel(1194279786357465239)
-                    await adminchannel.send(f"{invite.url} 新規URLが作成されました")
-                else:
-                    print(f"Error adding data to Google Sheet: {response.text}")
-            except Exception as e:
-                print(f"Error adding data to Google Sheet: {e}")
 
-    @check_time.before_loop
-    async def before_check(self):
-        await client.wait_until_ready()
 
 
 @client.event
@@ -112,36 +78,6 @@ async def geturl(ctx,day=1):
     invite = await channels.create_invite(max_age = int(day) * 24 * 3600)
     print(invite.url)
 
-    # Google Apps Scriptにデータを送信
-    try:
-        payload = {'inviteLink': invite.url}
-        response = requests.post("https://script.google.com/macros/s/AKfycbzC0g3AQuklpnXw-6iP36xP5wG2ZxrG6QXADkSNWXOfvDt_upIHUTKChCe_dpGBpmZqOA/exec", params=payload)
-        
-        if response.status_code == 200:
-            await ctx.send(f"{invite.url} この鯖のURLあげる！ 有効期限は{day}日間だよ！気をつけてね！")
-            embed = discord.Embed(title="新規URL発行", description=f"{ctx.author.mention}が{day}日間の招待リンクを作成しました")
-            adminchannel = client.get_channel(1194279786357465239)
-            await adminchannel.send(embed=embed)
-        else:
-            print(f"Error adding data to Google Sheet: {response.text}")
-            await ctx.send('An error occurred while updating the Google Sheet.')
-    except Exception as e:
-        print(f"Error adding data to Google Sheet: {e}")
-        await ctx.send('An error occurred while updating the Google Sheet.')
-
-
-@client.command(name="招待リンク")
-async def surl(ctx,day=10):
-    if day >= 2592000:
-        await ctx.send('2592000を超える招待URLは発行できません')
-        return
-    channels = client.get_channel(1118169854046896148)
-    invite = await channels.create_invite(max_age = int(day)) 
-    print(invite.url)
-    await ctx.send(f"{invite.url} この鯖のURLあげる！ 有効期限は{day}秒間だよ！気をつけてね！")
-    embed = discord.Embed(title="新規URL発行", description=f"{ctx.author.mention}が{day}秒間の招待リンクを作成しました")
-    adminchannel = client.get_channel(1194279786357465239)
-    await adminchannel.send(embed=embed)
 
 
 # @client.command(name="お問い合わせ")
@@ -160,11 +96,5 @@ async def surl(ctx,day=10):
 #     embed = discord.Embed(title="新規お問い合わせ", description=inquiry)
 #     await channel.send(embed=embed)
 #     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
-
-
-
-
-
-
 
 client.run(tkn.TOKEN)
