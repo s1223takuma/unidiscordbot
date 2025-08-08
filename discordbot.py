@@ -7,6 +7,7 @@ from datetime import time,datetime
 import pytz
 import requests
 import tkn
+import asyncio
 
 # 接続に必要なオブジェクトを生成
 intents = discord.Intents.all()
@@ -95,5 +96,33 @@ async def contact(ctx,*,inquiry):
     embed = discord.Embed(title="新規お問い合わせ", description=inquiry)
     await channel.send(embed=embed)
     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
+
+gamestatus = {}
+@client.command(name="人狼スタート")
+async def setting_game(ctx):
+    if ctx.guild.id in gamestatus:
+        await ctx.send("すでにゲームが進行中です。")
+        return
+    gamestatus[ctx.guild.id] = {"players": [], "roles": {}, "status": "募集"}
+    await ctx.send("🎯 人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
+    print(gamestatus)
+    await asyncio.sleep(30)
+    if len(gamestatus[ctx.guild.id]["players"]) < 3:
+        await ctx.send("参加者が3人未満のため、ゲームを中止します。")
+        del gamestatus[ctx.guild.id]
+        return
+
+@client.command(name="参加")
+async def join_game(ctx):
+    if ctx.guild.id not in gamestatus or gamestatus[ctx.guild.id]["status"] != "募集":
+        await ctx.send("現在、ゲームは募集していません。")
+        return
+
+    if ctx.author in gamestatus[ctx.guild.id]["players"]:
+        await ctx.send("すでに参加しています！")
+    else:
+        gamestatus[ctx.guild.id]["players"].append(ctx.author)
+        await ctx.send(f"{ctx.author.display_name} が参加しました！")
+        print(gamestatus)
 
 client.run(tkn.TOKEN)
