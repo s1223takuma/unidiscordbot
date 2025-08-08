@@ -77,24 +77,23 @@ async def geturl(ctx,day=1):
     channels = client.get_channel(ctx.channel.id)
     invite = await channels.create_invite(max_age = int(day) * 24 * 3600)
     print(invite.url)
+    await ctx.reply(f'招待URLを発行しました。\n{invite.url}\n有効期限は{day}日です。')
 
 
 
-# @client.command(name="お問い合わせ")
-# async def contact(ctx,*,inquiry):
-#     print(inquiry)
-#     managementrole = discord.utils.get(ctx.guild.roles, name='運営')
-#     teacherrole = discord.utils.get(ctx.guild.roles, name='職員')
-#     overwrites = {
-#         ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-#         ctx.author: discord.PermissionOverwrite(read_messages=True),
-#         managementrole: discord.PermissionOverwrite(read_messages=True),
-#         teacherrole: discord.PermissionOverwrite(read_messages=True),
-#     }
-#     channel = await ctx.guild.create_text_channel(f'お問い合わせ- {ctx.author.name}', overwrites=overwrites)
+@client.command(name="お問い合わせ")
+async def contact(ctx,*,inquiry):
+    print(inquiry)
+    managementrole = discord.utils.get(ctx.guild.roles, name='bots')
+    overwrites = {
+        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        ctx.author: discord.PermissionOverwrite(read_messages=True),
+        managementrole: discord.PermissionOverwrite(read_messages=True),
+    }
+    channel = await ctx.guild.create_text_channel(f'お問い合わせ- {ctx.author.name}', overwrites=overwrites)
 
-#     embed = discord.Embed(title="新規お問い合わせ", description=inquiry)
-#     await channel.send(embed=embed)
-#     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
+    embed = discord.Embed(title="新規お問い合わせ", description=inquiry)
+    await channel.send(embed=embed)
+    await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
 
 client.run(tkn.TOKEN)
