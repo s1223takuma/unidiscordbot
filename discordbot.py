@@ -86,7 +86,7 @@ async def geturl(ctx,day=1):
 @client.command(name="お問い合わせ")
 async def contact(ctx,*,inquiry):
     print(inquiry)
-    managementrole = discord.utils.get(ctx.guild.roles, name='bots')
+    managementrole = discord.utils.get(ctx.guild.roles, name='officers (example)')
     overwrites = {
         ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
         ctx.author: discord.PermissionOverwrite(read_messages=True),
@@ -112,7 +112,7 @@ async def setup(ctx):
     #     await ctx.send("参加者が3人未満のため、ゲームを中止します。")
     #     del gamestatus[ctx.guild.id]
     #     return
-    await ctx.send(f"ゲームを開始します！役職を配布します。{gamestatus}")
+    await ctx.send(f"ゲームを開始します！役職を配布します。")
     await start_game(ctx)
 
 @client.command(name="参加")
@@ -160,24 +160,52 @@ async def start_game(ctx):
 
 
 async def night_phase(ctx):
+    await ctx.send("夜がはじましました。みなさんDMの指示に従って行動してください。")
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "夜ターン"
-    for user,role in gamestatus[guild_id]["roles"].items():
+
+    for user, role in gamestatus[guild_id]["roles"].items():
         if role == "人狼":
-            await user.send("夜ターンです。誰を襲撃しますか？")
-            for idx, player in enumerate(gamestatus[guild_id]["players"], start=1):
-                if player != user:
-                    await user.send(f"{idx}. {player.display_name}({player.name})")
-            await user.send("番号で選んでください（例: `!襲撃 1`）")
+            await send_target_selection(user, gamestatus[guild_id]["players"], "襲撃")
         elif role == "占い師":
-            await user.send("夜ターンです。誰を占いますか？")
-            for idx, player in enumerate(gamestatus[guild_id]["players"], start=1):
-                if player != user:
-                    await user.send(f"{idx}. {player.display_name}({player.name})")
-            await user.send("番号で選んでください（例: `!占い 1`）")
+            await send_target_selection(user, gamestatus[guild_id]["players"], "占い")
+            await user.send(f"占ったユーザーの役職は、{gamestatus[guild_id]['roles'][gamestatus[guild_id]['占い_target']]}です。")
         else:
             await user.send("夜ターンです。村人は何もできません。")
+    await ctx.send("全員の夜アクション受付が完了しました。")
     await ctx.send(gamestatus[guild_id])
+
+
+
+async def send_target_selection(user, players, action_name):
+    """夜ターンの選択肢をDMで送って番号入力を待つ"""
+    await user.send(f"夜ターンです。誰を{action_name}しますか？")
+
+    # 選択肢表示
+    selectable = [p for p in players if p != user]
+    for idx, player in enumerate(selectable, start=1):
+        await user.send(f"{idx}. {player.display_name}({player.name})")
+
+    await user.send(f"番号で選んでください（例: `1`）")
+
+    def check(m):
+        return (
+            m.author == user and
+            m.content.isdigit() and
+            1 <= int(m.content) <= len(selectable)
+        )
+
+    try:
+        msg = await client.wait_for("message", check=check, timeout=60)  # 60秒待機
+        target_idx = int(msg.content) - 1
+        target_player = selectable[target_idx]
+        await user.send(f"あなたは {target_player.display_name} を{action_name}しました。")
+
+        # 選択結果をゲーム状態に保存
+        gamestatus[user.guild.id][f"{action_name}_target"] = target_player
+
+    except asyncio.TimeoutError:
+        await user.send("時間切れです。行動できませんでした。")
 
 
 
