@@ -150,7 +150,10 @@ async def start_game(ctx):
             await player.send(f"あなたの役職は **{role}** です。")
         except:
             await ctx.send(f"{player.mention} さんにDMが送れません！")
-    await ctx.send(gamestatus)
+            await ctx.send(f"役職を配布することができないため、ゲームを中止します。")
+            del gamestatus[guild_id]
+            return
+    # await ctx.send(gamestatus)
     await asyncio.sleep(2)
     await ctx.send("役職の配布が完了しました。ゲームを開始します...")
     await night_phase(ctx)
@@ -161,11 +164,21 @@ async def night_phase(ctx):
     gamestatus[guild_id]["status"] = "夜ターン"
     for user,role in gamestatus[guild_id]["roles"].items():
         if role == "人狼":
-            await user.send("夜ターンです。人狼は誰を襲撃しますか？")
+            await user.send("夜ターンです。誰を襲撃しますか？")
+            for idx, player in enumerate(gamestatus[guild_id]["players"], start=1):
+                if player != user:
+                    await user.send(f"{idx}. {player.display_name}({player.name})")
+            await user.send("番号で選んでください（例: `!襲撃 1`）")
         elif role == "占い師":
-            await user.send("夜ターンです。占い師は誰を占いますか？")
+            await user.send("夜ターンです。誰を占いますか？")
+            for idx, player in enumerate(gamestatus[guild_id]["players"], start=1):
+                if player != user:
+                    await user.send(f"{idx}. {player.display_name}({player.name})")
+            await user.send("番号で選んでください（例: `!占い 1`）")
         else:
             await user.send("夜ターンです。村人は何もできません。")
+    await ctx.send(gamestatus[guild_id])
+
 
 
 
