@@ -174,11 +174,18 @@ async def night_phase(ctx):
             await user.send("夜ターンです。村人は何もできません。")
     await ctx.send("全員の夜アクション受付が完了しました。")
     await ctx.send(gamestatus[guild_id])
+    await asyncio.sleep(5)  # 夜ターンの待機時間
+    await day_phase(ctx)
+
+async def day_phase(ctx):
+    guild_id = ctx.guild.id
+    gamestatus[guild_id]["status"] = "昼ターン"
+    await ctx.send(f"夜が明けました。昨晩の被害者は{gamestatus[guild_id]['襲撃_target'].display_name}({gamestatus[guild_id]['襲撃_target'].name})でした。")
+    
 
 
 
 async def send_target_selection(user, players, action_name):
-    """夜ターンの選択肢をDMで送って番号入力を待つ"""
     await user.send(f"夜ターンです。誰を{action_name}しますか？")
 
     # 選択肢表示
