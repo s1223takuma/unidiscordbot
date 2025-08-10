@@ -3,9 +3,6 @@ import traceback
 from discord.ext import commands,tasks
 from discord.utils import get
 from os import getenv
-from datetime import time,datetime
-import pytz
-import requests
 import tkn
 import asyncio
 import random
@@ -104,7 +101,7 @@ async def setup(ctx):
     if ctx.guild.id in gamestatus:
         await ctx.send("すでにゲームが進行中です。")
         return
-    gamestatus[ctx.guild.id] = {"players": [], "roles": {}, "status": "募集"}
+    gamestatus[ctx.guild.id] = {"players": [], "roles": {}, "status": "募集", "襲撃_target": None, "占い_target": None, "vote": {}}
     await ctx.send("🎯 人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
     print(gamestatus)
     await asyncio.sleep(30)
@@ -160,10 +157,9 @@ async def start_game(ctx):
 
 
 async def night_phase(ctx):
+    gamestatus[guild_id]["status"] = "夜ターン"
     await ctx.send("夜がはじましました。みなさんDMの指示に従って行動してください。")
     guild_id = ctx.guild.id
-    gamestatus[guild_id]["status"] = "夜ターン"
-
     for user, role in gamestatus[guild_id]["roles"].items():
         if role == "人狼":
             await send_target_selection(user, gamestatus[guild_id]["players"], "襲撃")
@@ -174,43 +170,67 @@ async def night_phase(ctx):
             await user.send("夜ターンです。村人は何もできません。")
     await ctx.send("全員の夜アクション受付が完了しました。")
     await ctx.send(gamestatus[guild_id])
-    await asyncio.sleep(5)  # 夜ターンの待機時間
+    await asyncio.sleep(5)
     await day_phase(ctx)
+
 
 async def day_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "昼ターン"
     await ctx.send(f"夜が明けました。昨晩の被害者は{gamestatus[guild_id]['襲撃_target'].display_name}({gamestatus[guild_id]['襲撃_target'].name})でした。")
-    
+    await ctx.send("議論の時間です。5分間与えられるので、誰を処刑するか決めてください。")
+    await asyncio.sleep(3)  # 昼ターンの待機時間
+    gamestatus[guild_id]["status"] = "投票ターン"
+    await ctx.send("議論の時間が終了しました。投票を行います。DMの指示に従ってください。")
+    for user in gamestatus[guild_id]["players"]:
+        await send_vote_selection(user, gamestatus[guild_id]["players"])
+    await ctx.send(gamestatus[guild_id])
 
 
-
-async def send_target_selection(user, players, action_name):
-    await user.send(f"夜ターンです。誰を{action_name}しますか？")
-
-    # 選択肢表示
-    selectable = [p for p in players if p != user]
+async def send_vote_selection(user, players):
+    await user.send("投票の時間です。誰を処刑しますか？")
+    selectable = [p for p in players]
     for idx, player in enumerate(selectable, start=1):
         await user.send(f"{idx}. {player.display_name}({player.name})")
-
     await user.send(f"番号で選んでください（例: `1`）")
-
     def check(m):
         return (
             m.author == user and
             m.content.isdigit() and
             1 <= int(m.content) <= len(selectable)
         )
-
     try:
         msg = await client.wait_for("message", check=check, timeout=60)  # 60秒待機
         target_idx = int(msg.content) - 1
         target_player = selectable[target_idx]
-        await user.send(f"あなたは {target_player.display_name} を{action_name}しました。")
+        await user.send(f"あなたは {target_player.display_name} を投票しました。")
+        if target_player in gamestatus[user.guild.id]["vote"]:
+            gamestatus[user.guild.id]["vote"][target_player] += 1
+        else:
+            gamestatus[user.guild.id]["vote"][target_player] = 1
+        await user.send("投票を受け付けました。サーバーのチャットに戻ってください")
+    except asyncio.TimeoutError:
+        await user.send("時間切れです。投票できませんでした。")
 
-        # 選択結果をゲーム状態に保存
+
+async def send_target_selection(user, players, action_name):
+    await user.send(f"夜ターンです。誰を{action_name}しますか？")
+    selectable = [p for p in players if p != user]
+    for idx, player in enumerate(selectable, start=1):
+        await user.send(f"{idx}. {player.display_name}({player.name})")
+    await user.send(f"番号で選んでください（例: `1`）")
+    def check(m):
+        return (
+            m.author == user and
+            m.content.isdigit() and
+            1 <= int(m.content) <= len(selectable)
+        )
+    try:
+        msg = await client.wait_for("message", check=check, timeout=60)  # 60秒待機
+        target_idx = int(msg.content) - 1
+        target_player = selectable[target_idx]
+        await user.send(f"あなたは {target_player.display_name} を{action_name}しました。サーバーのチャットに戻ってください")
         gamestatus[user.guild.id][f"{action_name}_target"] = target_player
-
     except asyncio.TimeoutError:
         await user.send("時間切れです。行動できませんでした。")
 
