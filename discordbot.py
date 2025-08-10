@@ -101,7 +101,7 @@ async def setup(ctx):
     if ctx.guild.id in gamestatus:
         await ctx.send("すでにゲームが進行中です。")
         return
-    gamestatus[ctx.guild.id] = {"players": [], "roles": {}, "status": "募集", "襲撃_target": None, "占い_target": None, "vote": {}}
+    gamestatus[ctx.guild.id] = {"players": [], "roles": {}, "status": "募集", "襲撃_target": [], "vote": {}}
     await ctx.send("🎯 人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
     print(gamestatus)
     await asyncio.sleep(30)
@@ -130,7 +130,7 @@ async def start_game(ctx):
     gamestatus[guild_id]["status"] = "配役"
 
     # 役職リスト（必要に応じて増やせる）
-    roles_list = ["人狼", "占い師"]
+    roles_list = ["人狼", "人狼"]
     for i in range(len(gamestatus[guild_id]["players"]) - 2):
         roles_list.append("村人")
 
@@ -157,15 +157,16 @@ async def start_game(ctx):
 
 
 async def night_phase(ctx):
-    gamestatus[guild_id]["status"] = "夜ターン"
     await ctx.send("夜がはじましました。みなさんDMの指示に従って行動してください。")
     guild_id = ctx.guild.id
+    gamestatus[guild_id]["status"] = "夜ターン"
     for user, role in gamestatus[guild_id]["roles"].items():
         if role == "人狼":
             await send_target_selection(user, gamestatus[guild_id]["players"], "襲撃")
         elif role == "占い師":
-            await send_target_selection(user, gamestatus[guild_id]["players"], "占い")
-            await user.send(f"占ったユーザーの役職は、{gamestatus[guild_id]['roles'][gamestatus[guild_id]['占い_target']]}です。")
+            gamestatus[guild_id][f'占い{user}_target'] = []
+            await send_target_selection(user, gamestatus[guild_id]["players"], f"占い{user}")
+            await user.send(f"占ったユーザーの役職は、{gamestatus[guild_id]['roles'][gamestatus[guild_id][f'占い{user}_target'][0]]}です。")
         else:
             await user.send("夜ターンです。村人は何もできません。")
     await ctx.send("全員の夜アクション受付が完了しました。")
@@ -177,7 +178,9 @@ async def night_phase(ctx):
 async def day_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "昼ターン"
-    await ctx.send(f"夜が明けました。昨晩の被害者は{gamestatus[guild_id]['襲撃_target'].display_name}({gamestatus[guild_id]['襲撃_target'].name})でした。")
+    target_name = [name.display_name for name in gamestatus[guild_id]["襲撃_target"]]
+    # target_id = [name.name for name in gamestatus[guild_id]["襲撃_target"]]
+    await ctx.send(f'夜が明けました。昨晩の被害者は{" ".join(target_name)}でした。')
     await ctx.send("議論の時間です。5分間与えられるので、誰を処刑するか決めてください。")
     await asyncio.sleep(3)  # 昼ターンの待機時間
     gamestatus[guild_id]["status"] = "投票ターン"
@@ -185,6 +188,8 @@ async def day_phase(ctx):
     for user in gamestatus[guild_id]["players"]:
         await send_vote_selection(user, gamestatus[guild_id]["players"])
     await ctx.send(gamestatus[guild_id])
+    gamestatus[guild_id]["襲撃_target"] = []
+    target_name = []
 
 
 async def send_vote_selection(user, players):
@@ -230,7 +235,7 @@ async def send_target_selection(user, players, action_name):
         target_idx = int(msg.content) - 1
         target_player = selectable[target_idx]
         await user.send(f"あなたは {target_player.display_name} を{action_name}しました。サーバーのチャットに戻ってください")
-        gamestatus[user.guild.id][f"{action_name}_target"] = target_player
+        gamestatus[user.guild.id][f"{action_name}_target"].append(target_player)
     except asyncio.TimeoutError:
         await user.send("時間切れです。行動できませんでした。")
 
