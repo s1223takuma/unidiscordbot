@@ -170,7 +170,6 @@ async def night_phase(ctx):
         else:
             await user.send("夜ターンです。村人は何もできません。")
     await ctx.send("全員の夜アクション受付が完了しました。")
-    await ctx.send(gamestatus[guild_id])
     await asyncio.sleep(5)
     await day_phase(ctx)
 
@@ -178,18 +177,31 @@ async def night_phase(ctx):
 async def day_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "昼ターン"
-    target_name = [name.display_name for name in gamestatus[guild_id]["襲撃_target"]]
+    target_name = [name.mention for name in gamestatus[guild_id]["襲撃_target"]]
     # target_id = [name.name for name in gamestatus[guild_id]["襲撃_target"]]
-    await ctx.send(f'夜が明けました。昨晩の被害者は{" ".join(target_name)}でした。')
+    await ctx.send(f'夜が明けました。昨晩の被害者は{"と、".join(target_name)}でした。')
     await ctx.send("議論の時間です。5分間与えられるので、誰を処刑するか決めてください。")
     await asyncio.sleep(3)  # 昼ターンの待機時間
     gamestatus[guild_id]["status"] = "投票ターン"
     await ctx.send("議論の時間が終了しました。投票を行います。DMの指示に従ってください。")
     for user in gamestatus[guild_id]["players"]:
         await send_vote_selection(user, gamestatus[guild_id]["players"])
-    await ctx.send(gamestatus[guild_id])
     gamestatus[guild_id]["襲撃_target"] = []
     target_name = []
+    vote_target_name = []
+    for player, votes in gamestatus[guild_id]["vote"].items():
+        if votes == max(gamestatus[guild_id]["vote"].values()):
+            vote_target_name.append(player)
+    target_mention = [name.mention for name in vote_target_name]
+    if len(vote_target_name) == 0:
+        await ctx.send("投票の結果、処刑される人はいませんでした。")
+    else:
+        await ctx.send(f"投票の結果、{', '.join(target_mention)} が処刑されました。")
+        for target in vote_target_name:
+            gamestatus[guild_id]["players"].remove(target)
+            del gamestatus[guild_id]["roles"][target]
+    gamestatus[guild_id]["vote"] = {}
+    await ctx.send(gamestatus[guild_id])
 
 
 async def send_vote_selection(user, players):
