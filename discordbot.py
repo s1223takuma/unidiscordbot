@@ -16,8 +16,8 @@ invite = None
 # 起動時に動作する処理
 @client.event
 async def on_ready():
-    # 起動したらターミナルにログイン通知が表示される
     print('ログインしました')
+    await client.tree.sync()
 
 
 
@@ -99,7 +99,7 @@ async def contact(ctx,*,inquiry):
 
 gamestatus = {}
 
-@client.command(name="人狼スタート")
+@client.command(name="人狼")
 async def setup(ctx):
     if ctx.guild.id in gamestatus:
         await ctx.send("すでにゲームが進行中です。")
@@ -112,19 +112,28 @@ async def setup(ctx):
         "vote": {},
         "player_channel": {},
         "dead_players": [],
-        "category": None
+        "category": None,
+        "heven_channel": None,
+        "heaven_voice_channel": None
     }
     await ctx.send("人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
     await asyncio.sleep(30)
-
     # if len(gamestatus[ctx.guild.id]["players"]) < 3:
     #     await ctx.send("参加者が3人未満のため、ゲームを中止します。")
     #     del gamestatus[ctx.guild.id]
     #     return
-
     await ctx.send(f"ゲームを開始します！役職を配布します。")
     category = await ctx.guild.create_category("人狼")
     gamestatus[ctx.guild.id]["category"] = category
+    for player in gamestatus[ctx.guild.id]["players"]:
+        overwrites = {
+            ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        }
+        heaven = await category.create_text_channel("天界", overwrites=overwrites)
+        heaven_voice = await category.create_voice_channel("天界", user_limit=99, overwrites=overwrites)
+        gamestatus[ctx.guild.id]["heven_channel"] = heaven
+        gamestatus[ctx.guild.id]["heaven_voice_channel"] = heaven_voice
+
     for player in gamestatus[ctx.guild.id]["players"]:
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -134,12 +143,13 @@ async def setup(ctx):
         gamestatus[ctx.guild.id]["player_channel"][player] = channel
     await start_game(ctx)
 
+
+
 @client.command(name="参加")
 async def join_game(ctx):
     if ctx.guild.id not in gamestatus or gamestatus[ctx.guild.id]["status"] != "募集":
         await ctx.send("現在、ゲームは募集していません。")
         return
-
     if ctx.author in gamestatus[ctx.guild.id]["players"]:
         await ctx.send("すでに参加しています！")
     else:
@@ -166,6 +176,8 @@ async def start_game(ctx):
     await asyncio.sleep(2)
     await ctx.send("役職配布完了。夜ターン開始...")
     await night_phase(ctx)
+
+
 
 async def night_phase(ctx):
     guild_id = ctx.guild.id
@@ -199,6 +211,14 @@ async def night_phase(ctx):
             gamestatus[guild_id]["dead_players"].append(victim)
             gamestatus[guild_id]["players"].remove(victim)
             await gamestatus[guild_id]["player_channel"][victim].send("あなたは人狼に襲撃されました。死亡しました。")
+            overwrite_text = {
+            victim: discord.PermissionOverwrite(read_messages=True),
+            }
+            await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
+            overwrite_voice = {
+            victim: discord.PermissionOverwrite(connect=True, speak=True, read_messages=True),
+            }
+            await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
     gamestatus[guild_id]["襲撃_target"] = []
     await asyncio.sleep(2)
     await judge_phase(ctx)
@@ -208,6 +228,8 @@ async def night_phase(ctx):
         del gamestatus[guild_id]
         return
 
+
+
 async def day_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "昼ターン"
@@ -216,7 +238,7 @@ async def day_phase(ctx):
         await ctx.send(f"夜が明けました。昨晩の被害者は {', '.join(dead_names)} です。")
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
-    await ctx.send("議論時間（5秒間のデモ）...")
+    await ctx.send("議論の時間です。5分間で犯人を探してください。")
     await asyncio.sleep(5)
     await ctx.send("投票開始!各自専用チャンネルで投票してください。")
     tasks = [send_vote_selection(guild_id, user, gamestatus[guild_id]["players"]) for user in gamestatus[guild_id]["players"]]
@@ -239,6 +261,8 @@ async def day_phase(ctx):
     else:
         del gamestatus[guild_id]
         return
+
+
 
 async def judge_phase(ctx):
     guild_id = ctx.guild.id
