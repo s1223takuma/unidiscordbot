@@ -122,28 +122,20 @@ async def setup(ctx):
         "heaven_voice_channel": None,
         "turn": 1
     }
-
-    # ボタン付きメッセージ送信
     view = JoinView(ctx)
     await ctx.send(
         "人狼ゲームを開始します！\n30秒間参加者を募集します。\n下のボタンから参加してください。",
         view=view
     )
-
     await asyncio.sleep(30)
-
-    # 最低人数チェック（例: 3人未満で中止）
     if len(gamestatus[ctx.guild.id]["players"]) < 3:
         await ctx.send("参加者が3人未満のため、ゲームを中止します。")
         del gamestatus[ctx.guild.id]
         return
-
-    # 役職配布など開始処理
     await ctx.send(f"ゲームを開始します！役職を配布します。")
     category = await ctx.guild.create_category("人狼")
     gamestatus[ctx.guild.id]["category"] = category
     overwrites = {ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
-
     heaven = await category.create_text_channel("天界", overwrites=overwrites)
     heaven_voice = await category.create_voice_channel("天界", user_limit=99, overwrites=overwrites)
     gamestatus[ctx.guild.id]["heven_channel"] = heaven
@@ -155,7 +147,6 @@ async def setup(ctx):
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
         gamestatus[ctx.guild.id]["player_channel"][player] = channel
-
     await start_game(ctx)
 
 
@@ -164,7 +155,7 @@ async def setup(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-    roles_list = ["人狼", "占い師","騎士"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 3)
+    roles_list = ["人狼","占い師","騎士"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 3)
     random.shuffle(roles_list)
     for player, role in zip(gamestatus[guild_id]["players"], roles_list):
         gamestatus[guild_id]["roles"][player] = role
@@ -252,7 +243,7 @@ async def day_phase(ctx):
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
     await ctx.send("議論の時間です。5分間で犯人を探してください。")
-    await asyncio.sleep(5)
+    await asyncio.sleep(300)
     await ctx.send("投票開始!各自専用チャンネルで投票してください。")
     tasks = [send_vote_selection(guild_id, user, gamestatus[guild_id]["players"]) for user in gamestatus[guild_id]["players"]]
     await asyncio.gather(*tasks)
