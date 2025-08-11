@@ -132,7 +132,6 @@ async def setup(ctx):
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
         gamestatus[ctx.guild.id]["player_channel"][player] = channel
-        await channel.send(f"あなたは人狼ゲームに参加しました。役職配布までお待ちください。")
     await start_game(ctx)
 
 @client.command(name="参加")
@@ -157,7 +156,7 @@ async def start_game(ctx):
     for player, role in zip(gamestatus[guild_id]["players"], roles_list):
         gamestatus[guild_id]["roles"][player] = role
         try:
-            await gamestatus[ctx.guild.id]["player_channel"][player].send(f"あなたの役職は **{role}** です。")
+            await gamestatus[ctx.guild.id]["player_channel"][player].send(f"{player.mention}\nあなたの役職は **{role}** です。")
         except:
             await ctx.send(f"{player.mention} さんにメッセージが送れません！ ゲーム中止。")
             del gamestatus[guild_id]
