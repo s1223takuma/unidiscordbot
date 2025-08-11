@@ -1,4 +1,5 @@
 import discord
+from discord.ui import View, Button
 import traceback
 from discord.ext import commands,tasks
 from discord.utils import get
@@ -18,7 +19,6 @@ invite = None
 async def on_ready():
     print('ログインしました')
     await client.tree.sync()
-
 
 
 
@@ -95,9 +95,30 @@ async def contact(ctx,*,inquiry):
     await channel.send(embed=embed)
     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
 
-
-
+# ===========ここから人狼=============
 gamestatus = {}
+
+class JoinView(View):
+    def __init__(self, ctx):
+        super().__init__(timeout=None)  # タイムアウトしない
+        self.ctx = ctx
+
+    @discord.ui.button(label="参加", style=discord.ButtonStyle.green)
+    async def join_button(self, interaction: discord.Interaction, button: Button):
+        guild_id = self.ctx.guild.id
+
+        # 募集していない場合
+        if gamestatus[guild_id]["status"] != "募集":
+            await interaction.response.send_message("現在募集は行っていません。", ephemeral=True)
+            return
+
+        player = interaction.user
+        if player in gamestatus[guild_id]["players"]:
+            await interaction.response.send_message("すでに参加しています！", ephemeral=True)
+        else:
+            gamestatus[guild_id]["players"].append(player)
+            await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
+
 
 @client.command(name="人狼")
 async def setup(ctx):
@@ -114,25 +135,35 @@ async def setup(ctx):
         "dead_players": [],
         "category": None,
         "heven_channel": None,
-        "heaven_voice_channel": None
+        "heaven_voice_channel": None,
+        "turn": 0
     }
-    await ctx.send("人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
+
+    # ボタン付きメッセージ送信
+    view = JoinView(ctx)
+    await ctx.send(
+        "人狼ゲームを開始します！\n30秒間参加者を募集します。\n下のボタンから参加してください。",
+        view=view
+    )
+
     await asyncio.sleep(30)
-    # if len(gamestatus[ctx.guild.id]["players"]) < 3:
-    #     await ctx.send("参加者が3人未満のため、ゲームを中止します。")
-    #     del gamestatus[ctx.guild.id]
-    #     return
+
+    # 最低人数チェック（例: 3人未満で中止）
+    if len(gamestatus[ctx.guild.id]["players"]) < 3:
+        await ctx.send("参加者が3人未満のため、ゲームを中止します。")
+        del gamestatus[ctx.guild.id]
+        return
+
+    # 役職配布など開始処理
     await ctx.send(f"ゲームを開始します！役職を配布します。")
     category = await ctx.guild.create_category("人狼")
     gamestatus[ctx.guild.id]["category"] = category
-    for player in gamestatus[ctx.guild.id]["players"]:
-        overwrites = {
-            ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        }
-        heaven = await category.create_text_channel("天界", overwrites=overwrites)
-        heaven_voice = await category.create_voice_channel("天界", user_limit=99, overwrites=overwrites)
-        gamestatus[ctx.guild.id]["heven_channel"] = heaven
-        gamestatus[ctx.guild.id]["heaven_voice_channel"] = heaven_voice
+    overwrites = {ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+
+    heaven = await category.create_text_channel("天界", overwrites=overwrites)
+    heaven_voice = await category.create_voice_channel("天界", user_limit=99, overwrites=overwrites)
+    gamestatus[ctx.guild.id]["heven_channel"] = heaven
+    gamestatus[ctx.guild.id]["heaven_voice_channel"] = heaven_voice
 
     for player in gamestatus[ctx.guild.id]["players"]:
         overwrites = {
@@ -141,20 +172,9 @@ async def setup(ctx):
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
         gamestatus[ctx.guild.id]["player_channel"][player] = channel
+
     await start_game(ctx)
 
-
-
-@client.command(name="参加")
-async def join_game(ctx):
-    if ctx.guild.id not in gamestatus or gamestatus[ctx.guild.id]["status"] != "募集":
-        await ctx.send("現在、ゲームは募集していません。")
-        return
-    if ctx.author in gamestatus[ctx.guild.id]["players"]:
-        await ctx.send("すでに参加しています！")
-    else:
-        gamestatus[ctx.guild.id]["players"].append(ctx.author)
-        await ctx.reply(f"{ctx.author.display_name} が参加しました！")
 
 
 
@@ -181,6 +201,8 @@ async def start_game(ctx):
 
 async def night_phase(ctx):
     guild_id = ctx.guild.id
+    gamestatus[guild_id]["turn"] += 1
+    await ctx.send(f"**====={gamestatus[guild_id]['turn']}日目夜=====**")
     gamestatus[guild_id]["status"] = "夜ターン"
     await ctx.send("夜が始まりました。各自専用チャンネルで行動してください。")
     tasks = []
@@ -211,14 +233,15 @@ async def night_phase(ctx):
             gamestatus[guild_id]["dead_players"].append(victim)
             gamestatus[guild_id]["players"].remove(victim)
             await gamestatus[guild_id]["player_channel"][victim].send("あなたは人狼に襲撃されました。死亡しました。")
-            overwrite_text = {
-            victim: discord.PermissionOverwrite(read_messages=True),
-            }
+            overwrite_text = discord.PermissionOverwrite(read_messages=True)
             await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
-            overwrite_voice = {
-            victim: discord.PermissionOverwrite(connect=True, speak=True, read_messages=True),
-            }
+            overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
             await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
+    if gamestatus[guild_id]["襲撃_target"] == []:
+        await ctx.send("人狼の襲撃は行われませんでした。")
+    else:
+        target_players = [p.mention for p in gamestatus[guild_id]["襲撃_target"] if p not in gamestatus[guild_id]["dead_players"]]
+        ctx.send(f"{'と'.join(target_players)} が人狼に襲撃されました。")
     gamestatus[guild_id]["襲撃_target"] = []
     await asyncio.sleep(2)
     await judge_phase(ctx)
@@ -233,6 +256,7 @@ async def night_phase(ctx):
 async def day_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "昼ターン"
+    await ctx.send(f"**====={gamestatus[guild_id]['turn']}日目昼=====**")
     dead_names = [p.mention for p in gamestatus[guild_id]["dead_players"]]
     if dead_names:
         await ctx.send(f"夜が明けました。昨晩の被害者は {', '.join(dead_names)} です。")
@@ -251,10 +275,14 @@ async def day_phase(ctx):
         await ctx.send(f"投票の結果、{executed.mention} が処刑されました。")
         gamestatus[guild_id]["players"].remove(executed)
         gamestatus[guild_id]["dead_players"].append(executed)
+        overwrite_text = discord.PermissionOverwrite(read_messages=True)
+        await gamestatus[guild_id]["heven_channel"].set_permissions(executed, overwrite=overwrite_text)
+        overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
+        await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(executed, overwrite=overwrite_voice)
     else:
         await ctx.send("投票の結果、処刑者なし。")
     gamestatus[guild_id]["vote"] = {}
-    await asyncio.sleep(2)
+    await asyncio.sleep(5)
     await judge_phase(ctx)
     if gamestatus[guild_id]["status"] != "勝敗判定":
         await night_phase(ctx)
@@ -304,7 +332,7 @@ async def send_target_selection(guild_id, user, players, action_name):
     try:
         msg = await client.wait_for("message", check=check, timeout=30)
         target_player = selectable[int(msg.content) - 1]
-        await gamestatus[guild_id]["player_channel"][user].send(f"あなたは {target_player.display_name} を{action_name[0:2]}しました。")
+        await gamestatus[guild_id]["player_channel"][user].send(f"あなたは {target_player.display_name}({target_player.name}) を{action_name[0:2]}しました。")
         gamestatus[guild_id][f"{action_name}_target"].append(target_player)
     except asyncio.TimeoutError:
         await gamestatus[guild_id]["player_channel"][user].send("時間切れで行動できませんでした。")
@@ -315,15 +343,13 @@ async def send_vote_selection(guild_id, user, players):
     for idx, player in enumerate(selectable, start=1):
         await gamestatus[guild_id]["player_channel"][user].send(f"{idx}. {player.display_name}({player.name})")
     await gamestatus[guild_id]["player_channel"][user].send("番号で選んでください（例: 1）")
-
     def check(m):
         return m.author == user and m.content.isdigit() and 1 <= int(m.content) <= len(selectable)
-
     try:
         msg = await client.wait_for("message", check=check, timeout=30)
         target_player = selectable[int(msg.content) - 1]
         gamestatus[guild_id]["vote"][target_player] = gamestatus[guild_id]["vote"].get(target_player, 0) + 1
-        await gamestatus[guild_id]["player_channel"][user].send(f"{target_player.display_name} に投票しました。")
+        await gamestatus[guild_id]["player_channel"][user].send(f"{target_player.display_name}({target_player.name}) に投票しました。")
     except asyncio.TimeoutError:
         await gamestatus[guild_id]["player_channel"][user].send("時間切れで投票できませんでした。")
 
