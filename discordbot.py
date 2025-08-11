@@ -163,6 +163,10 @@ async def night_phase(ctx):
     for user, role in gamestatus[guild_id]["roles"].items():
         if role == "人狼":
             await send_target_selection(user, gamestatus[guild_id]["players"], "襲撃")
+            for i in gamestatus[guild_id]["襲撃_target"]:
+                await i.send(f"人狼に襲撃されました。あなたは死亡しました。")
+                gamestatus[guild_id]["players"].remove(i)
+                del gamestatus[guild_id]["roles"][i]
         elif role == "占い師":
             gamestatus[guild_id][f'占い{user}_target'] = []
             await send_target_selection(user, gamestatus[guild_id]["players"], f"占い{user}")
