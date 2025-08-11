@@ -28,24 +28,6 @@ async def on_message(message):
     if message.author.id == 1083313772258676786:
         return
     await client.process_commands(message)
-    # alert_role = discord.utils.get(message.guild.roles, name="ちゅうがくせい")
-    # post_time = message.created_at
-    # jst = pytz.timezone('Asia/Tokyo')
-    # post_time_jst = post_time.astimezone(jst)
-    # str_time = int(post_time_jst.strftime("%H%M"))
-    # if str_time <= 800 or str_time >= 2200:
-    #     if alert_role in message.author.roles:
-    #         if message.author.guild.name == 'botお試し':
-    #             embed = discord.Embed(title="中学生の発言検知", description=f'{message.content}\n該当メッセージリンク {message.jump_url}')
-    #             adminchannel = client.get_channel(1194279786357465239)
-    #             await adminchannel.send(embed=embed)
-    #             embed = discord.Embed(title="あなたの発言が検知されました")
-    #             await message.author.send(embed=embed)
-    #             print(str_time)
-    #             print('けんち')
-    # else:
-    #     print(str_time)
-
 
 @client.command(name="カテゴリ作成")
 async def create_category(ctx, *, content):
@@ -164,7 +146,6 @@ async def setup(ctx):
     heaven_voice = await category.create_voice_channel("天界", user_limit=99, overwrites=overwrites)
     gamestatus[ctx.guild.id]["heven_channel"] = heaven
     gamestatus[ctx.guild.id]["heaven_voice_channel"] = heaven_voice
-
     for player in gamestatus[ctx.guild.id]["players"]:
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -237,11 +218,13 @@ async def night_phase(ctx):
             await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
             overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
             await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
+            if victim.voice and victim.voice.channel:
+                await victim.move_to(gamestatus[guild_id]["heaven_voice_channel"])
     if gamestatus[guild_id]["襲撃_target"] == []:
         await ctx.send("人狼の襲撃は行われませんでした。")
     else:
-        target_players = [p.mention for p in gamestatus[guild_id]["襲撃_target"] if p not in gamestatus[guild_id]["dead_players"]]
-        ctx.send(f"{'と'.join(target_players)} が人狼に襲撃されました。")
+        target_players = [p.mention for p in gamestatus[guild_id]["襲撃_target"]]
+        await ctx.send(f"{'と'.join(target_players)} が人狼に襲撃されました。")
     gamestatus[guild_id]["襲撃_target"] = []
     await asyncio.sleep(2)
     await judge_phase(ctx)
@@ -279,6 +262,8 @@ async def day_phase(ctx):
         await gamestatus[guild_id]["heven_channel"].set_permissions(executed, overwrite=overwrite_text)
         overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
         await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(executed, overwrite=overwrite_voice)
+        if executed.voice and executed.voice.channel:
+                await executed.move_to(gamestatus[guild_id]["heaven_voice_channel"])
     else:
         await ctx.send("投票の結果、処刑者なし。")
     gamestatus[guild_id]["vote"] = {}
