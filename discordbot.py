@@ -95,8 +95,9 @@ async def contact(ctx,*,inquiry):
     await channel.send(embed=embed)
     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
 
-gamestatus = {}
 
+
+gamestatus = {}
 
 @client.command(name="人狼スタート")
 async def setup(ctx):
@@ -114,10 +115,10 @@ async def setup(ctx):
     await ctx.send("人狼ゲームを開始します！ \n30秒間参加者を募集します。参加者は`!参加`と入力してください")
     await asyncio.sleep(30)
 
-    # if len(gamestatus[ctx.guild.id]["players"]) < 3:
-    #     await ctx.send("参加者が3人未満のため、ゲームを中止します。")
-    #     del gamestatus[ctx.guild.id]
-    #     return
+    if len(gamestatus[ctx.guild.id]["players"]) < 3:
+        await ctx.send("参加者が3人未満のため、ゲームを中止します。")
+        del gamestatus[ctx.guild.id]
+        return
 
     await ctx.send(f"ゲームを開始します！役職を配布します。")
     await start_game(ctx)
@@ -139,10 +140,8 @@ async def join_game(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-
     roles_list = ["人狼", "占い師"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 2)
     random.shuffle(roles_list)
-
     for player, role in zip(gamestatus[guild_id]["players"], roles_list):
         gamestatus[guild_id]["roles"][player] = role
         try:
@@ -151,7 +150,6 @@ async def start_game(ctx):
             await ctx.send(f"{player.mention} さんにDMが送れません！ ゲーム中止。")
             del gamestatus[guild_id]
             return
-
     await asyncio.sleep(2)
     await ctx.send("役職配布完了。夜ターン開始...")
     await night_phase(ctx)
@@ -160,7 +158,6 @@ async def night_phase(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "夜ターン"
     await ctx.send("夜が始まりました。各自DMで行動してください。")
-
     tasks = []
     for user, role in gamestatus[guild_id]["roles"].items():
         if user in gamestatus[guild_id]["dead_players"]:
@@ -172,10 +169,7 @@ async def night_phase(ctx):
             tasks.append(send_target_selection(guild_id, user, gamestatus[guild_id]["players"], f"占い{user}"))
         else:
             tasks.append(user.send("夜ターンです。村人は何もできません。"))
-
     await asyncio.gather(*tasks)
-
-    # 占い結果送信
     for user, role in gamestatus[guild_id]["roles"].items():
         if role == "占い師":
             targets = gamestatus[guild_id].get(f'占い{user}_target', [])
@@ -187,19 +181,19 @@ async def night_phase(ctx):
                     await user.send(f"占ったユーザー {target_player.display_name} は **人間** です。")
             else:
                 await user.send("占いは行われませんでした。")
-
-    # 襲撃処理
     for victim in gamestatus[guild_id]["襲撃_target"]:
         if victim not in gamestatus[guild_id]["dead_players"]:
             gamestatus[guild_id]["dead_players"].append(victim)
             gamestatus[guild_id]["players"].remove(victim)
             await victim.send("あなたは人狼に襲撃されました。死亡しました。")
     gamestatus[guild_id]["襲撃_target"] = []
-
     await asyncio.sleep(2)
     await judge_phase(ctx)
     if gamestatus[guild_id]["status"] != "勝敗判定":
         await day_phase(ctx)
+    else:
+        del gamestatus[guild_id]
+        return
 
 async def day_phase(ctx):
     guild_id = ctx.guild.id
@@ -209,18 +203,14 @@ async def day_phase(ctx):
         await ctx.send(f"夜が明けました。昨晩の被害者は {', '.join(dead_names)} です。")
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
-
     await ctx.send("議論時間（5秒間のデモ）...")
     await asyncio.sleep(5)
-
     await ctx.send("投票開始！DMで投票してください。")
     tasks = [send_vote_selection(guild_id, user, gamestatus[guild_id]["players"]) for user in gamestatus[guild_id]["players"]]
     await asyncio.gather(*tasks)
-
-
     if gamestatus[guild_id]["vote"]:
         max_votes = max(gamestatus[guild_id]["vote"].values())
-        await ctx.send(gamestatus[guild_id]['vote'])
+        # await ctx.send(gamestatus[guild_id]['vote'])
         top_candidates = [p for p, v in gamestatus[guild_id]["vote"].items() if v == max_votes]
         executed = random.choice(top_candidates)  # 同票ならランダム
         await ctx.send(f"投票の結果、{executed.mention} が処刑されました。")
@@ -228,19 +218,20 @@ async def day_phase(ctx):
         gamestatus[guild_id]["dead_players"].append(executed)
     else:
         await ctx.send("投票の結果、処刑者なし。")
-
     gamestatus[guild_id]["vote"] = {}
     await asyncio.sleep(2)
     await judge_phase(ctx)
     if gamestatus[guild_id]["status"] != "勝敗判定":
         await night_phase(ctx)
+    else:
+        del gamestatus[guild_id]
+        return
 
 async def judge_phase(ctx):
     guild_id = ctx.guild.id
     alive_roles = [role for player, role in gamestatus[guild_id]["roles"].items() if player not in gamestatus[guild_id]["dead_players"]]
     wolf_count = alive_roles.count("人狼")
     villager_count = len(alive_roles) - wolf_count
-
     if wolf_count == 0:
         await ctx.send("村人陣営の勝利！")
         gamestatus[guild_id]["status"] = "勝敗判定"
@@ -252,12 +243,12 @@ async def judge_phase(ctx):
     else:
         await ctx.send("次のターンへ進みます。")
 
+
 async def show_roles(ctx):
     guild_id = ctx.guild.id
     await ctx.send("最終結果")
     for player, role in gamestatus[guild_id]["roles"].items():
         await ctx.send(f"{player.mention} : {role}")
-    del gamestatus[guild_id]
 
 
 
