@@ -113,6 +113,7 @@ async def setup(ctx):
         "roles": {},
         "status": "募集",
         "襲撃_target": [],
+        "守護_target": [],
         "vote": {},
         "player_channel": {},
         "dead_players": [],
@@ -163,7 +164,7 @@ async def setup(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-    roles_list = ["人狼", "占い師"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 2)
+    roles_list = ["人狼", "占い師","騎士"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 3)
     random.shuffle(roles_list)
     for player, role in zip(gamestatus[guild_id]["players"], roles_list):
         gamestatus[guild_id]["roles"][player] = role
@@ -195,6 +196,9 @@ async def night_phase(ctx):
         elif role == "占い師":
             gamestatus[guild_id][f'占い{user}_target'] = []
             tasks.append(send_target_selection(guild_id, user, gamestatus[guild_id]["players"], f"占い{user}"))
+        elif role == "騎士":
+            gamestatus[guild_id][f'騎士{user}_target'] = []
+            tasks.append(send_target_selection(guild_id, user, gamestatus[guild_id]["players"], "守護"))
         else:
             tasks.append(gamestatus[guild_id]["player_channel"][user].send("夜ターンです。村人は何もできません。"))
     await asyncio.gather(*tasks)
@@ -210,16 +214,22 @@ async def night_phase(ctx):
             else:
                 await gamestatus[guild_id]["player_channel"][user].send("占いは行われませんでした。")
     for victim in gamestatus[guild_id]["襲撃_target"]:
-        if victim not in gamestatus[guild_id]["dead_players"]:
-            gamestatus[guild_id]["dead_players"].append(victim)
-            gamestatus[guild_id]["players"].remove(victim)
-            await gamestatus[guild_id]["player_channel"][victim].send("あなたは人狼に襲撃されました。死亡しました。")
-            overwrite_text = discord.PermissionOverwrite(read_messages=True)
-            await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
-            overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
-            await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
-            if victim.voice:
-                await victim.move_to(gamestatus[guild_id]["heaven_voice_channel"])
+        if gamestatus[guild_id]["守護_target"] != []:
+            if victim == gamestatus[guild_id]["守護_target"][0]:
+                await gamestatus[guild_id]["player_channel"][victim].send("あなたは騎士に守られました。")
+                gamestatus[guild_id]["襲撃_target"].remove(victim)
+                gamestatus[guild_id]["守護_target"] = []
+            elif victim not in gamestatus[guild_id]["dead_players"]:
+                gamestatus[guild_id]["守護_target"] = []
+                gamestatus[guild_id]["dead_players"].append(victim)
+                gamestatus[guild_id]["players"].remove(victim)
+                await gamestatus[guild_id]["player_channel"][victim].send("あなたは人狼に襲撃されました。死亡しました。")
+                overwrite_text = discord.PermissionOverwrite(read_messages=True)
+                await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
+                overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
+                await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
+                if victim.voice:
+                    await victim.move_to(gamestatus[guild_id]["heaven_voice_channel"])
     await asyncio.sleep(2)
     await judge_phase(ctx)
     if gamestatus[guild_id]["status"] != "勝敗判定":
