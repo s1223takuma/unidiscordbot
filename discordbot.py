@@ -120,7 +120,8 @@ async def setup(ctx):
         "category": None,
         "heven_channel": None,
         "heaven_voice_channel": None,
-        "turn": 1
+        "turn": 1,
+        "wolf_list": []
     }
     view = JoinView(ctx)
     await ctx.send(
@@ -155,10 +156,17 @@ async def setup(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-    roles_list = ["人狼","占い師","騎士"] + ["村人"] * (len(gamestatus[guild_id]["players"]) - 3)
+    if len(gamestatus[guild_id]["players"]) < 6:
+        roles_list = ["人狼","占い師","狂人"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-3)]
+    elif len(gamestatus[guild_id]["players"]) < 8:
+        roles_list = ["人狼","狂人","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-4)]
+    else:
+        roles_list = ["人狼","人狼","狂人","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-5)]
     random.shuffle(roles_list)
     for player, role in zip(gamestatus[guild_id]["players"], roles_list):
         gamestatus[guild_id]["roles"][player] = role
+        if role == "人狼":
+            gamestatus[guild_id]["wolf_list"].append(player)
         try:
             await gamestatus[ctx.guild.id]["player_channel"][player].send(f"{player.mention}\nあなたの役職は **{role}** です。")
         except:
@@ -166,6 +174,11 @@ async def start_game(ctx):
             del gamestatus[guild_id]
             await cleanup_channels(ctx)
             return
+    lunatic = [key for key, value in gamestatus[guild_id]["roles"].items() if value == "狂人"]
+    if lunatic:
+        lunatic = lunatic[0]
+        await gamestatus[guild_id]["player_channel"][lunatic].send("あなたは狂人です。人狼と協力して村人を排除してください。")
+        await gamestatus[guild_id]["player_channel"][lunatic].send(f"人狼は{', '.join([wolf.display_name for wolf in gamestatus[guild_id]['wolf_list']])} です。")
     gamestatus[guild_id]["status"] = "夜ターン"
     await asyncio.sleep(2)
     await ctx.send("役職配布完了。夜ターン開始...")
@@ -211,6 +224,18 @@ async def night_phase(ctx):
                 gamestatus[guild_id]["襲撃_target"].remove(victim)
                 gamestatus[guild_id]["守護_target"] = []
             elif victim not in gamestatus[guild_id]["dead_players"]:
+                gamestatus[guild_id]["守護_target"] = []
+                gamestatus[guild_id]["dead_players"].append(victim)
+                gamestatus[guild_id]["players"].remove(victim)
+                await gamestatus[guild_id]["player_channel"][victim].send("あなたは人狼に襲撃されました。死亡しました。")
+                overwrite_text = discord.PermissionOverwrite(read_messages=True)
+                await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
+                overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
+                await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
+                if victim.voice:
+                    await victim.move_to(gamestatus[guild_id]["heaven_voice_channel"])
+        else:
+            if victim not in gamestatus[guild_id]["dead_players"]:
                 gamestatus[guild_id]["守護_target"] = []
                 gamestatus[guild_id]["dead_players"].append(victim)
                 gamestatus[guild_id]["players"].remove(victim)
