@@ -4,9 +4,10 @@ import traceback
 from discord.ext import commands,tasks
 from discord.utils import get
 from os import getenv
-import tkn
 import asyncio
 import random
+
+TOKEN = getenv('Discord_TOKEN')
 
 # 接続に必要なオブジェクトを生成
 intents = discord.Intents.all()
@@ -118,7 +119,7 @@ async def setup(ctx):
         "category": None,
         "heven_channel": None,
         "heaven_voice_channel": None,
-        "turn": 0
+        "turn": 1
     }
 
     # ボタン付きメッセージ送信
@@ -182,7 +183,6 @@ async def start_game(ctx):
 
 async def night_phase(ctx):
     guild_id = ctx.guild.id
-    gamestatus[guild_id]["turn"] += 1
     await ctx.send(f"**====={gamestatus[guild_id]['turn']}日目夜=====**")
     gamestatus[guild_id]["status"] = "夜ターン"
     await ctx.send("夜が始まりました。各自専用チャンネルで行動してください。")
@@ -218,14 +218,8 @@ async def night_phase(ctx):
             await gamestatus[guild_id]["heven_channel"].set_permissions(victim, overwrite=overwrite_text)
             overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
             await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(victim, overwrite=overwrite_voice)
-            if victim.voice and victim.voice.channel:
+            if victim.voice:
                 await victim.move_to(gamestatus[guild_id]["heaven_voice_channel"])
-    if gamestatus[guild_id]["襲撃_target"] == []:
-        await ctx.send("人狼の襲撃は行われませんでした。")
-    else:
-        target_players = [p.mention for p in gamestatus[guild_id]["襲撃_target"]]
-        await ctx.send(f"{'と'.join(target_players)} が人狼に襲撃されました。")
-    gamestatus[guild_id]["襲撃_target"] = []
     await asyncio.sleep(2)
     await judge_phase(ctx)
     if gamestatus[guild_id]["status"] != "勝敗判定":
@@ -238,11 +232,13 @@ async def night_phase(ctx):
 
 async def day_phase(ctx):
     guild_id = ctx.guild.id
+    gamestatus[guild_id]["turn"] += 1
     gamestatus[guild_id]["status"] = "昼ターン"
     await ctx.send(f"**====={gamestatus[guild_id]['turn']}日目昼=====**")
-    dead_names = [p.mention for p in gamestatus[guild_id]["dead_players"]]
+    dead_names = [p.mention for p in gamestatus[guild_id]["襲撃_target"]]
     if dead_names:
         await ctx.send(f"夜が明けました。昨晩の被害者は {', '.join(dead_names)} です。")
+        gamestatus[guild_id]["襲撃_target"] = []
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
     await ctx.send("議論の時間です。5分間で犯人を探してください。")
@@ -262,8 +258,8 @@ async def day_phase(ctx):
         await gamestatus[guild_id]["heven_channel"].set_permissions(executed, overwrite=overwrite_text)
         overwrite_voice = discord.PermissionOverwrite(connect=True, speak=True, read_messages=True)
         await gamestatus[guild_id]["heaven_voice_channel"].set_permissions(executed, overwrite=overwrite_voice)
-        if executed.voice and executed.voice.channel:
-                await executed.move_to(gamestatus[guild_id]["heaven_voice_channel"])
+        if executed.voice:
+            await executed.move_to(gamestatus[guild_id]["heaven_voice_channel"])
     else:
         await ctx.send("投票の結果、処刑者なし。")
     gamestatus[guild_id]["vote"] = {}
@@ -302,18 +298,14 @@ async def show_roles(ctx):
     for player, role in gamestatus[guild_id]["roles"].items():
         await ctx.send(f"{player.mention} : {role}")
 
-
-
 async def send_target_selection(guild_id, user, players, action_name):
     selectable = [p for p in players if p != user and p not in gamestatus[guild_id]["dead_players"]]
     await gamestatus[guild_id]["player_channel"][user].send(f"誰を{action_name[0:2]}しますか？")
     for idx, player in enumerate(selectable, start=1):
         await gamestatus[guild_id]["player_channel"][user].send(f"{idx}. {player.display_name}({player.name})")
     await gamestatus[guild_id]["player_channel"][user].send("番号で選んでください（例: 1）")
-
     def check(m):
         return m.author == user and m.content.isdigit() and 1 <= int(m.content) <= len(selectable)
-
     try:
         msg = await client.wait_for("message", check=check, timeout=30)
         target_player = selectable[int(msg.content) - 1]
@@ -346,4 +338,5 @@ async def cleanup_channels(ctx):
             await channel.delete()
         await category.delete()
 
-client.run(tkn.TOKEN)
+
+client.run(TOKEN)
