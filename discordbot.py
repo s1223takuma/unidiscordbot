@@ -5,6 +5,7 @@ from discord.ext import commands,tasks
 from discord.utils import get
 from os import getenv
 import asyncio
+import tkn
 import random
 
 TOKEN = getenv('Discord_TOKEN')
@@ -21,14 +22,30 @@ async def on_ready():
     print('ログインしました')
     await client.tree.sync()
 
-
+isobserve = False
 
 @client.event
 async def on_message(message):
+    user = client.get_user(tkn.admin_id)
+    if not message.author.bot:
+        if isobserve:
+            await user.send(f"「{message.author.guild.name}」で{message.author.mention}が発言:{message.content}")
     print(message.content)
     if message.author.id == 1083313772258676786:
         return
     await client.process_commands(message)
+
+@client.command(name="監視")
+async def observe(ctx):
+    global isobserve
+    if ctx.author.id != tkn.admin_id:
+        await ctx.reply("このコマンドは管理者のみ使用できます。")
+        return
+    isobserve = not isobserve
+    if isobserve:
+        await ctx.reply("観察モードを有効にしました。")
+    else:
+        await ctx.reply("観察モードを無効にしました。")
 
 @client.command(name="カテゴリ作成")
 async def create_category(ctx, *, content):
