@@ -156,8 +156,10 @@ async def setup(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-    if len(gamestatus[guild_id]["players"]) < 6:
-        roles_list = ["人狼","占い師","狂人"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-3)]
+    if len(gamestatus[guild_id]["players"]) <= 4:
+        roles_list = ["人狼","占い師"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-2)]
+    elif len(gamestatus[guild_id]["players"]) < 6:
+        roles_list = ["人狼","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-3)]
     elif len(gamestatus[guild_id]["players"]) < 8:
         roles_list = ["人狼","狂人","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-4)]
     else:
