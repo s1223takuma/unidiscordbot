@@ -173,9 +173,7 @@ async def setup(ctx):
 async def start_game(ctx):
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
-    if len(gamestatus[guild_id]["players"]) <= 4:
-        roles_list = ["人狼","占い師"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-2)]
-    elif len(gamestatus[guild_id]["players"]) < 6:
+    if len(gamestatus[guild_id]["players"]) < 6:
         roles_list = ["人狼","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-3)]
     elif len(gamestatus[guild_id]["players"]) < 8:
         roles_list = ["人狼","狂人","占い師","騎士"] + ["村人" for _ in range(len(gamestatus[guild_id]["players"])-4)]
@@ -290,7 +288,7 @@ async def day_phase(ctx):
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
     await ctx.send("議論の時間です。5分間で犯人を探してください。")
-    await asyncio.sleep(300)
+    await asyncio.sleep(180)
     await ctx.send("投票開始!各自専用チャンネルで投票してください。")
     tasks = [send_vote_selection(guild_id, user, gamestatus[guild_id]["players"]) for user in gamestatus[guild_id]["players"]]
     await asyncio.gather(*tasks)
