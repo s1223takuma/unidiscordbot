@@ -24,14 +24,15 @@ async def on_ready():
 
 isobserve = False
 
-observe_channel = []
+observe_guild = []
 
 @client.event
 async def on_message(message):
     user = client.get_user(tkn.admin_id)
+    print(message)
     if not message.author.bot:
         if isobserve:
-            if message.channel.id in observe_channel:
+            if message.guild.id in observe_guild:
                 await user.send(f"「{message.author.guild.name}」で{message.author.mention}が発言:{message.content}")
     print(message.content)
     if message.author.id == 1083313772258676786:
@@ -44,14 +45,14 @@ async def observe(ctx):
     if ctx.author.id != tkn.admin_id:
         await ctx.reply("このコマンドは管理者のみ使用できます。")
         return
-    if ctx.channel.id in observe_channel:
+    if ctx.guild.id in observe_guild:
         isobserve = False
-        observe_channel.remove(ctx.channel.id)
+        observe_guild.remove(ctx.guild.id)
         await ctx.reply("監視を停止しました。")
     else:
         isobserve = True
-        observe_channel.append(ctx.channel.id)
-        await ctx.reply("監視を開始しました。監視中のチャンネルでの発言を管理者に通知します。")
+        observe_guild.append(ctx.guild.id)
+        await ctx.reply("監視を開始しました。監視中のサーバーでの発言を管理者に通知します。")
 
 @client.command(name="カテゴリ作成")
 async def create_category(ctx, *, content):
