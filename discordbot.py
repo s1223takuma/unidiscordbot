@@ -25,17 +25,14 @@ async def on_ready():
 isobserve = False
 
 observe_guild = []
-observe_channel = []
 
 @client.event
 async def on_message(message):
     user = client.get_user(tkn.admin_id)
     if not message.author.bot:
-        if message.guild.id in observe_guild:
-            await user.send(f"「{message.author.guild.name}」で{message.author.mention}が発言:{message.content}")
-        elif message.channel.id in observe_channel:
-            await user.send(f"「{message.channel.name}」で{message.author.mention}が発言:{message.content}")
-    print(message.content)
+        if message.guild.id in observe_guild or message.channel.id in observe_guild:
+            if message.content[0] != "!":
+                await user.send(f"「{message.author.guild.name}」で{message.author.mention}が発言:{message.content}")
     if message.author.id == 1083313772258676786:
         return
     await client.process_commands(message)
@@ -53,15 +50,15 @@ async def observe(ctx, mode="server"):
         else:
             observe_guild.append(ctx.guild.id)
             await ctx.reply("監視を開始しました。監視中のサーバーでの発言を管理者に通知します。")
-    elif mode == "channel":
-        if ctx.channel.id in observe_channel:
-            observe_channel.remove(ctx.channel.id)
+    elif mode == "c":
+        if ctx.channel.id in observe_guild:
+            observe_guild.remove(ctx.channel.id)
             await ctx.reply("監視を停止しました。")
         else:
-            observe_channel.append(ctx.channel.id)
+            observe_guild.append(ctx.channel.id)
             await ctx.reply("監視を開始しました。このチャンネルでの発言を管理者に通知します。")
     else:
-        await ctx.reply("無効なモードです。`!監視` または `!監視 channel` を使用してください。")
+        await ctx.reply("無効なモードです。`!監視` または `!監視 c` を使用してください。")
 
 @client.command(name="カテゴリ作成")
 async def create_category(ctx, *, content):
