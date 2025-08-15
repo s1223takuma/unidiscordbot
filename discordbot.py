@@ -7,6 +7,7 @@ from os import getenv
 import asyncio
 import tkn
 import random
+import nacl
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -37,6 +38,32 @@ async def on_message(message):
         return
     await client.process_commands(message)
 
+@client.command(name="join")
+async def join(ctx):
+    if ctx.author.voice is None:
+        await ctx.reply("ボイスチャンネルに参加してからコマンドを実行してください。")
+        return
+    voice_channel = ctx.author.voice.channel
+    if ctx.voice_client is None:
+        await voice_channel.connect()
+        await ctx.reply(f"{voice_channel.name}に参加しました。")
+    else:
+        await ctx.voice_client.move_to(voice_channel)
+        await ctx.reply(f"{voice_channel.name}に移動しました。")
+
+
+@client.command(name="leave")
+async def leave(ctx):
+    if ctx.voice_client is None:
+        await ctx.reply("ボイスチャンネルに参加していません。")
+    else:
+        await ctx.voice_client.disconnect()
+        await ctx.reply("ボイスチャンネルから退出しました。")
+
+
+
+
+
 @client.command(name="監視")
 async def observe(ctx, mode="server"):
     if ctx.author.id != tkn.admin_id:
@@ -60,29 +87,25 @@ async def observe(ctx, mode="server"):
     else:
         await ctx.reply("無効なモードです。`!監視` または `!監視 c` を使用してください。")
 
+
+
 @client.command(name="カテゴリ作成")
 async def create_category(ctx, *, content):
     category = await ctx.guild.create_category(content)
-
     text_channels = [f'{content}{category_type}' for category_type in ["雑談", "募集", "解説動画、情報"]]
     voice_channels = [f'{content}VC{vc_number}' for vc_number in range(1, 3)]
-
     for channel_name in text_channels:
         await category.create_text_channel(channel_name)
-
     # Add 聞き専チャットvc1 and 聞き専チャットvc2
     await category.create_text_channel(f'聞き専チャットvc1')
     await category.create_text_channel(f'聞き専チャットvc2')
-
     for channel_name in voice_channels:
         await category.create_voice_channel(channel_name, user_limit=99)
-
     await ctx.reply(f'「{content}」のカテゴリーとチャンネルが作成されました。')
 
 
 @client.command(name='url')
 async def geturl(ctx,day=1):
-
     if day >= 30:
         await ctx.send('30日を超える招待URLは発行できません')
         return
@@ -115,16 +138,13 @@ class JoinView(View):
     def __init__(self, ctx):
         super().__init__(timeout=None)  # タイムアウトしない
         self.ctx = ctx
-
     @discord.ui.button(label="参加", style=discord.ButtonStyle.green)
     async def join_button(self, interaction: discord.Interaction, button: Button):
         guild_id = self.ctx.guild.id
-
         # 募集していない場合
         if gamestatus[guild_id]["status"] != "募集":
             await interaction.response.send_message("現在募集は行っていません。", ephemeral=True)
             return
-
         player = interaction.user
         if player in gamestatus[guild_id]["players"]:
             await interaction.response.send_message("すでに参加しています！", ephemeral=True)
