@@ -132,7 +132,7 @@ async def contact(ctx,*,inquiry):
     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
 
 
-@client.command(name="help")
+@client.command(name="h")
 async def help_command(ctx):
     embed = discord.Embed(title="ヘルプ", description="以下のコマンドを使用できます。")
     embed.add_field(name="!join", value="ボイスチャンネルに参加します。", inline=False)
