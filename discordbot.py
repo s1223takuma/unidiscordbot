@@ -131,6 +131,19 @@ async def contact(ctx,*,inquiry):
     await channel.send(embed=embed)
     await channel.send(f"こんにちは！\n{ctx.author.mention}さんのお問い合わせを受け付けました。{managementrole.mention}よりご連絡いたします。")
 
+
+@client.command(name="help")
+async def help_command(ctx):
+    embed = discord.Embed(title="ヘルプ", description="以下のコマンドを使用できます。")
+    embed.add_field(name="!join", value="ボイスチャンネルに参加します。", inline=False)
+    embed.add_field(name="!leave", value="ボイスチャンネルから退出します。", inline=False)
+    embed.add_field(name="!監視 [server/c]", value="サーバー全体または特定のチャンネルの発言を監視します。(管理者専用)", inline=False)
+    embed.add_field(name="!カテゴリ作成 [カテゴリー名]", value="指定した名前でカテゴリーとチャンネルを作成します。", inline=False)
+    embed.add_field(name="!url [日数]", value="指定した日数の招待URLを発行します。", inline=False)
+    embed.add_field(name="!お問い合わせ [内容]", value="管理者にお問い合わせを送信します。", inline=False)
+    embed.add_field(name="!人狼", value="人狼ゲームを開始します。", inline=False)
+    await ctx.send(embed=embed)
+
 # ===========ここから人狼=============
 gamestatus = {}
 
