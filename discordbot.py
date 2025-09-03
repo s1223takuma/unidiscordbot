@@ -10,6 +10,7 @@ import random
 import nacl
 from pdf2image import convert_from_path
 import os
+from math import ceil
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -25,7 +26,7 @@ async def on_ready():
     print('ログインしました')
     await client.tree.sync()
 
-from math import ceil
+
 
 @client.event
 async def on_message(message):
@@ -52,11 +53,15 @@ async def on_message(message):
                     paths.append(img_path)
                 chunk_size = 10
                 total_chunks = ceil(len(paths) / chunk_size)
+                if message.content == "":
+                    await message.channel.send(f"# {attachment.filename}")
+                else:
+                    await message.channel.send(f"# {message.content}")
                 for chunk_index in range(total_chunks):
                     chunk_paths = paths[chunk_index*chunk_size : (chunk_index+1)*chunk_size]
                     files = [discord.File(p) for p in chunk_paths]
                     await message.channel.send(
-                        content=f"{attachment.filename} - ページ {chunk_index*chunk_size+1} ~ {chunk_index*chunk_size+len(files)}",
+                        content=f"{chunk_index*chunk_size+1}p ~ {chunk_index*chunk_size+len(files)}p",
                         files=files
                     )
                 for path in paths:
