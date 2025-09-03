@@ -8,6 +8,8 @@ import asyncio
 import tkn
 import random
 import nacl
+from pdf2image import convert_from_path
+import os
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -22,6 +24,25 @@ invite = None
 async def on_ready():
     print('ログインしました')
     await client.tree.sync()
+
+@client.event
+async def on_message(message):
+    if message.attachments:
+        for attachment in message.attachments:
+            if attachment.filename.endswith(".pdf"):
+                # PDFを保存
+                file_path = f"./{attachment.filename}"
+                await attachment.save(file_path)
+
+                # PDFを画像に変換
+                images = convert_from_path(file_path)
+                for i, img in enumerate(images):
+                    img_path = f"page_{i+1}.png"
+                    img.save(img_path, "PNG")
+                    await message.channel.send(file=discord.File(img_path))
+                    os.remove(img_path)
+
+                os.remove(file_path)
 
 isobserve = False
 
@@ -429,6 +450,8 @@ async def cleanup_channels(ctx):
         for channel in category.channels:
             await channel.delete()
         await category.delete()
+
+
 
 
 client.run(TOKEN)
