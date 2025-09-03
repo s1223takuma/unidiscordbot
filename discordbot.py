@@ -25,39 +25,48 @@ async def on_ready():
     print('ログインしました')
     await client.tree.sync()
 
-@client.event
-async def on_message(message):
-    if message.attachments:
-        for attachment in message.attachments:
-            if attachment.filename.endswith(".pdf"):
-                # PDFを保存
-                file_path = f"./{attachment.filename}"
-                await attachment.save(file_path)
-
-                # PDFを画像に変換
-                images = convert_from_path(file_path)
-                for i, img in enumerate(images):
-                    img_path = f"page_{i+1}.png"
-                    img.save(img_path, "PNG")
-                    await message.channel.send(file=discord.File(img_path))
-                    os.remove(img_path)
-
-                os.remove(file_path)
-
-isobserve = False
-
-observe_guild = []
+from math import ceil
 
 @client.event
 async def on_message(message):
     user = client.get_user(tkn.admin_id)
     if not message.author.bot:
-        if message.guild.id in observe_guild or message.channel.id in observe_guild:
-            if message.content[0] != "!":
-                await user.send(f"「{message.author.guild.name}」で{message.author.mention}が発言:{message.content}")
+        if message.guild and (message.guild.id in observe_guild or message.channel.id in observe_guild):
+            if not message.content.startswith("!"):
+                await user.send(
+                    f"「{message.guild.name}」で{message.author.mention}が発言:{message.content}"
+                )
     if message.author.id == 1083313772258676786:
         return
     await client.process_commands(message)
+    if message.attachments:
+        for attachment in message.attachments:
+            if attachment.filename.endswith(".pdf"):
+                file_path = f"./{attachment.filename}"
+                await attachment.save(file_path)
+                images = convert_from_path(file_path)
+                paths = []
+                for i, img in enumerate(images):
+                    img_path = f"page_{i+1}.png"
+                    img.save(img_path, "PNG")
+                    paths.append(img_path)
+                chunk_size = 10
+                total_chunks = ceil(len(paths) / chunk_size)
+                for chunk_index in range(total_chunks):
+                    chunk_paths = paths[chunk_index*chunk_size : (chunk_index+1)*chunk_size]
+                    files = [discord.File(p) for p in chunk_paths]
+                    await message.channel.send(
+                        content=f"{attachment.filename} - ページ {chunk_index*chunk_size+1} ~ {chunk_index*chunk_size+len(files)}",
+                        files=files
+                    )
+                for path in paths:
+                    os.remove(path)
+                os.remove(file_path)
+
+
+isobserve = False
+
+observe_guild = []
 
 @client.command(name="join")
 async def join(ctx):
