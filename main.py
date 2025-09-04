@@ -1,29 +1,17 @@
 import discord
-from discord.ui import View, Button
-from discord.ext import commands
 from discord.utils import get
 from os import getenv
 import tkn
 from pdf2image import convert_from_path
 import os
 from math import ceil
+
+from bot_setup import intents, client,invite
 from mycommands import help as hc, create_url as cu ,contact as ct, manage_category as cc ,observe_manager as ob
 from games.jinro.setup import setup as jinro_setup
-from bot_setup import intents, client,invite
+from automation import pdf_handler
 
 TOKEN = getenv('Discord_TOKEN')
-
-# 接続に必要なオブジェクトを生成
-
-
-
-
-
-# 起動時に動作する処理
-@client.event
-async def on_ready():
-    print('ログインしました')
-    await client.tree.sync()
 
 @client.event
 async def on_command_error(ctx, error):
@@ -41,33 +29,7 @@ async def on_message(message):
     if message.author.id == 1083313772258676786:
         return
     await client.process_commands(message)
-    if message.attachments:
-        for attachment in message.attachments:
-            if attachment.filename.endswith(".pdf"):
-                file_path = f"./{attachment.filename}"
-                await attachment.save(file_path)
-                images = convert_from_path(file_path)
-                paths = []
-                for i, img in enumerate(images):
-                    img_path = f"page_{i+1}.png"
-                    img.save(img_path, "PNG")
-                    paths.append(img_path)
-                chunk_size = 10
-                total_chunks = ceil(len(paths) / chunk_size)
-                if message.content == "":
-                    await message.channel.send(f"# {attachment.filename}")
-                else:
-                    await message.channel.send(f"# {message.content}")
-                for chunk_index in range(total_chunks):
-                    chunk_paths = paths[chunk_index*chunk_size : (chunk_index+1)*chunk_size]
-                    files = [discord.File(p) for p in chunk_paths]
-                    await message.channel.send(
-                        content=f"{chunk_index*chunk_size+1}p ~ {chunk_index*chunk_size+len(files)}p",
-                        files=files
-                    )
-                for path in paths:
-                    os.remove(path)
-                os.remove(file_path)
+    await pdf_handler.open_pdf(message)
 
 
 
