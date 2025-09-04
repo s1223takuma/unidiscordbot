@@ -1,25 +1,22 @@
 import discord
 from discord.ui import View, Button
-import traceback
-from discord.ext import commands,tasks
+from discord.ext import commands
 from discord.utils import get
 from os import getenv
-import asyncio
 import tkn
-import random
-import nacl
 from pdf2image import convert_from_path
 import os
 from math import ceil
-from mycommands import help as hc, create_url as cu ,contact as ct, manage_category as cc ,observe as ob
+from mycommands import help as hc, create_url as cu ,contact as ct, manage_category as cc ,observe_manager as ob
 from games.jinro.setup import setup as jinro_setup
+from bot_setup import intents, client,invite
 
 TOKEN = getenv('Discord_TOKEN')
 
 # 接続に必要なオブジェクトを生成
-intents = discord.Intents.all()
-client = commands.Bot(command_prefix="!",intents=intents)
-invite = None
+
+
+
 
 
 # 起動時に動作する処理

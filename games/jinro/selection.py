@@ -1,6 +1,6 @@
 from games.jinro.status import gamestatus
 import asyncio
-from main import client
+from bot_setup import client
 
 
 async def send_target_selection(guild_id, user, players, action_name):

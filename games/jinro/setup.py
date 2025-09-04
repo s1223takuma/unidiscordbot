@@ -1,8 +1,8 @@
 from games.jinro.status import gamestatus
-from views import JoinView
+from games.jinro.views import JoinView
 import discord
 import asyncio
-from manager import start_game
+from games.jinro.manager import start_game
 
 async def setup(ctx):
     if ctx.guild.id in gamestatus:

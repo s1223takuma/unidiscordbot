@@ -3,9 +3,10 @@ import asyncio
 import discord
 from games.jinro.status import gamestatus
 from games.jinro.selection import send_target_selection, send_vote_selection
-from setup import cleanup_channels
+
 
 async def start_game(ctx):
+    from games.jinro.setup import cleanup_channels
     guild_id = ctx.guild.id
     gamestatus[guild_id]["status"] = "配役"
     if len(gamestatus[guild_id]["players"]) < 6:
@@ -150,6 +151,7 @@ async def day_phase(ctx):
         return
 
 async def judge_phase(ctx):
+    from games.jinro.setup import cleanup_channels
     guild_id = ctx.guild.id
     alive_roles = [role for player, role in gamestatus[guild_id]["roles"].items() if player not in gamestatus[guild_id]["dead_players"]]
     wolf_count = alive_roles.count("人狼")
