@@ -1,15 +1,16 @@
 import discord
 from discord.utils import get
 from os import getenv
-import tkn
 from pdf2image import convert_from_path
 import os
 from math import ceil
 
+import tkn
 from bot_setup import intents, client,invite
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob
 from games.jinro.setup import setup as jinro_setup
-from automation import pdf_handler
+from automation import pdf_handler, observe as observemessage
+
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -19,13 +20,7 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_message(message):
-    user = client.get_user(tkn.admin_id)
-    if not message.author.bot:
-        if message.guild and (message.guild.id in ob.observe_guild or message.channel.id in ob.observe_guild):
-            if not message.content.startswith("!"):
-                await user.send(
-                    f"「{message.guild.name}」で{message.author.mention}が発言:{message.content}"
-                )
+    await observemessage.send_observe_message(message, admin_id=tkn.admin_id)
     if message.author.bot:
         return
     await client.process_commands(message)
