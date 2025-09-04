@@ -2,6 +2,7 @@ import os
 import discord
 from pdf2image import convert_from_path
 from math import ceil
+
 async def open_pdf(message):
     if message.attachments:
         for attachment in message.attachments:

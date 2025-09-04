@@ -7,7 +7,7 @@ import os
 from math import ceil
 
 from bot_setup import intents, client,invite
-from mycommands import help as hc, create_url as cu ,contact as ct, manage_category as cc ,observe_manager as ob
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler
 
@@ -26,7 +26,7 @@ async def on_message(message):
                 await user.send(
                     f"「{message.guild.name}」で{message.author.mention}が発言:{message.content}"
                 )
-    if message.author.id == 1083313772258676786:
+    if message.author.bot:
         return
     await client.process_commands(message)
     await pdf_handler.open_pdf(message)
