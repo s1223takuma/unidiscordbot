@@ -7,16 +7,12 @@ from math import ceil
 
 import tkn
 from bot_setup import intents, client,invite
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
 
 
 TOKEN = getenv('Discord_TOKEN')
-
-@client.event
-async def on_command_error(ctx, error):
-    await ctx.send(f"エラーが発生しました: {error}")
 
 @client.event
 async def on_message(message):
@@ -27,7 +23,9 @@ async def on_message(message):
     await pdf_handler.open_pdf(message)
 
 
-
+@client.command()
+async def search(ctx, *, query: str):
+    await sr.search(ctx, query=query)
 
 # @client.command(name="join")
 # async def join(ctx):

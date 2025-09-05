@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+
 async def help(ctx):
     embed = discord.Embed(title="ヘルプ", description="以下のコマンドを使用できます。")
     embed.add_field(name="!join", value="ボイスチャンネルに参加します。", inline=False)
