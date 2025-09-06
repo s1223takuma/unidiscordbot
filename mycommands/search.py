@@ -26,7 +26,6 @@ async def searchnews(ctx, *, query):
             timelimit=None,
             max_results=4
         ))
-    print(results)
     if results:
         resultlink = "+".join(query.split(" "))
         reply = f"[{query}:googleニュース検索](https://google.com/search?q={resultlink}&tbm=nws)\n"
