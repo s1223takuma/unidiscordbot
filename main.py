@@ -27,6 +27,14 @@ async def on_message(message):
 async def search(ctx, *, query: str):
     await sr.search(ctx, query=query)
 
+@client.command()
+async def searchnews(ctx, *, query: str):
+    await sr.searchnews(ctx, query=query)
+
+@client.command()
+async def searchimage(ctx, *, query: str):
+    await sr.searchimage(ctx, query=query)
+
 # @client.command(name="join")
 # async def join(ctx):
 #     if ctx.author.voice is None:
