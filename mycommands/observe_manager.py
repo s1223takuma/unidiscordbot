@@ -1,5 +1,3 @@
-import tkn
-
 isobserve = False
 adminuser = {}
 observe_guild = []
