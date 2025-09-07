@@ -39,7 +39,6 @@ async def searchimage(ctx, *, query: str):
 async def join(ctx):
     await vc.join(ctx)
 
-
 @client.command(name="leave")
 async def leave(ctx):
     await vc.leave(ctx)
