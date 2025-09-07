@@ -10,4 +10,7 @@ async def help(ctx):
     embed.add_field(name="!url [日数]", value="指定した日数の招待URLを発行します。", inline=False)
     embed.add_field(name="!お問い合わせ [内容]", value="管理者にお問い合わせを送信します。", inline=False)
     embed.add_field(name="!人狼", value="人狼ゲームを開始します。", inline=False)
+    embed.add_field(name="!search [クエリ]", value="ウェブ検索を行います。", inline=False)
+    embed.add_field(name="!searchnews [クエリ]", value="ニュース検索を行います。", inline=False)
+    embed.add_field(name="!searchimage [クエリ]", value="画像検索を行います。", inline=False)
     await ctx.send(embed=embed)
