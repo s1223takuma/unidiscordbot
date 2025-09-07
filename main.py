@@ -22,7 +22,6 @@ async def on_message(message):
     await client.process_commands(message)
     await pdf_handler.open_pdf(message)
 
-
 @client.command()
 async def search(ctx, *, query: str):
     await sr.search(ctx, query=query)
