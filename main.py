@@ -16,7 +16,7 @@ TOKEN = getenv('Discord_TOKEN')
 
 @client.event
 async def on_message(message):
-    await observemessage.send_observe_message(message, admin_id=tkn.admin_id)
+    await observemessage.send_observe_message(message)
     if message.author.bot:
         return
     await client.process_commands(message)
