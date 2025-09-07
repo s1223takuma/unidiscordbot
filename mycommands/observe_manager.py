@@ -4,7 +4,7 @@ isobserve = False
 adminuser = {}
 observe_guild = []
 async def observe(ctx, mode="server"):
-    if ctx.author.id != tkn.admin_id:
+    if not ctx.author.guild_permissions.administrator:
             await ctx.reply("このコマンドは管理者のみ使用できます。")
             return
     global isobserve
