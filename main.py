@@ -7,7 +7,7 @@ from math import ceil
 
 import tkn
 from bot_setup import intents, client,invite
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
 
@@ -35,29 +35,14 @@ async def searchnews(ctx, *, query: str):
 async def searchimage(ctx, *, query: str):
     await sr.searchimage(ctx, query=query)
 
-# @client.command(name="join")
-# async def join(ctx):
-#     if ctx.author.voice is None:
-#         await ctx.reply("ボイスチャンネルに参加してからコマンドを実行してください。")
-#         return
-#     voice_channel = ctx.author.voice.channel
-#     if ctx.voice_client is None:
-#         await voice_channel.connect()
-#         await ctx.reply(f"{voice_channel.name}に参加しました。")
-#     else:
-#         await ctx.voice_client.move_to(voice_channel)
-#         await ctx.reply(f"{voice_channel.name}に移動しました。")
+@client.command(name="join")
+async def join(ctx):
+    await vc.join(ctx)
 
 
-# @client.command(name="leave")
-# async def leave(ctx):
-#     if ctx.voice_client is None:
-#         await ctx.reply("ボイスチャンネルに参加していません。")
-#     else:
-#         await ctx.voice_client.disconnect()
-#         await ctx.reply("ボイスチャンネルから退出しました。")
-
-
+@client.command(name="leave")
+async def leave(ctx):
+    await vc.leave(ctx)
 
 @client.command(name="監視")
 async def observe(ctx, mode="server"):
