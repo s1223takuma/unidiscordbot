@@ -4,7 +4,7 @@ async def send_observe_message(message):
     if message.guild is None:
     # DM の場合の処理
         return
-    # print(ob.adminuser)
+    print(ob.adminuser)
     users = ob.adminuser.get(message.guild.id, [])
     for user_id in users:
         user = message.guild.get_member(user_id)

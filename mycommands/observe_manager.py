@@ -1,13 +1,11 @@
-isobserve = False
 adminuser = {}
 observe_guild = []
 async def observe(ctx, mode="server"):
     if not ctx.author.guild_permissions.administrator:
             await ctx.reply("このコマンドは管理者のみ使用できます。")
             return
-    global isobserve
     if mode == "server":
-        if ctx.guild.id in observe_guild:
+        if ctx.guild.id in observe_guild and ctx.author.id in adminuser.get(ctx.guild.id, []):
             adminuser[ctx.guild.id].remove(ctx.author.id)
             observe_guild.remove(ctx.guild.id)
             await ctx.reply("監視を停止しました。")
@@ -19,7 +17,7 @@ async def observe(ctx, mode="server"):
                 adminuser[ctx.guild.id].append(ctx.author.id)
             await ctx.reply("監視を開始しました。監視中のサーバーでの発言を管理者に通知します。")
     elif mode == "c":
-        if ctx.channel.id in observe_guild:
+        if ctx.channel.id in observe_guild and ctx.author.id in adminuser.get(ctx.guild.id, []):
             adminuser[ctx.channel.id].remove(ctx.author.id)
             observe_guild.remove(ctx.channel.id)
             await ctx.reply("監視を停止しました。")
