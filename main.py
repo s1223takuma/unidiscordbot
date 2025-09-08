@@ -13,6 +13,7 @@ from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels
 
 
+
 TOKEN = getenv('Discord_TOKEN')
 
 @client.event
@@ -36,6 +37,15 @@ async def on_message(message):
     if message.content.startswith('!'):
         return
     await speak_text(message, message.content, message.author.id)
+
+@client.event
+async def on_voice_state_update(member, before, after):
+    if before.channel is None and after.channel is not None:
+        print(f"{member} が {after.channel} に参加しました")
+        print(after.channel.id)
+        await vc.auto_join(after.channel)
+
+
 
 @client.command()
 async def search(ctx, *, query: str):
