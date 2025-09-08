@@ -2,7 +2,7 @@ import os
 import discord
 import asyncio
 import tempfile
-from ttx import DEFAULT_SPEAKER, VoiceVoxTTS
+from Voicebot.ttx import DEFAULT_SPEAKER, VoiceVoxTTS
 
 tts = VoiceVoxTTS()
 voice_clients = {}
@@ -25,7 +25,6 @@ async def set_speaker(ctx, speaker_id: int = None):
 
 
 async def list_speakers(ctx):
-    """利用可能な話者一覧を表示"""
     speaker_info = """
 🎤 **VoiceVox 話者一覧**
 ```
@@ -52,7 +51,6 @@ async def list_speakers(ctx):
     await ctx.send(speaker_info)
 
 async def say_text(ctx, *, text: str):
-        """指定したテキストを読み上げ"""
         guild_id = ctx.guild.id
         
         if guild_id not in voice_clients:
@@ -89,30 +87,22 @@ async def speak_text(ctx, text: str, user_id: int):
             temp_path = temp_file.name
             
         print(f"Temp file created: {temp_path}")
-        
-        # ファイルが正しく作成されているか確認
         if not os.path.exists(temp_path):
             print("❌ Temp file was not created")
             return
             
         file_size = os.path.getsize(temp_path)
         print(f"Temp file size: {file_size} bytes")
-        
-        # 既に再生中の場合は停止
         if voice_client.is_playing():
             voice_client.stop()
-            await asyncio.sleep(0.5)  # 停止を待つ
+            await asyncio.sleep(0.5)
             
         print("Starting audio playback...")
-        
-        # FFmpegのオプションを追加
         source = discord.FFmpegPCMAudio(
             temp_path,
-            before_options='-loglevel panic',  # FFmpegログを抑制
-            options='-vn'  # ビデオストリームを無効化
+            before_options='-loglevel panic', 
+            options='-vn'
         )
-        
-        # 音声を再生
         voice_client.play(
             source,
             after=lambda e: cleanup_temp_file(temp_path, e)
@@ -131,7 +121,6 @@ async def speak_text(ctx, text: str, user_id: int):
         await ctx.send(f"❌ 音声再生エラー: {str(e)}")
 
 def cleanup_temp_file(file_path: str, error):
-    """一時ファイルをクリーンアップ"""
     try:
         if os.path.exists(file_path):
             os.unlink(file_path)
@@ -142,7 +131,6 @@ def cleanup_temp_file(file_path: str, error):
         print(f"Audio playback finished with error: {error}")
 
 def clean_text(text: str) -> str:
-    """テキストをクリーンアップ（URL、メンション等を除去）"""
     import re
     
     # URL除去

@@ -10,6 +10,7 @@ from bot_setup import intents, client,invite
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
+from Voicebot.voicebot import speak_text, read_channels
 
 
 TOKEN = getenv('Discord_TOKEN')
@@ -21,6 +22,20 @@ async def on_message(message):
         return
     await client.process_commands(message)
     await pdf_handler.open_pdf(message)
+    if message.author.bot:
+            return
+            
+    guild_id = message.guild.id if message.guild else None
+    
+    if guild_id not in read_channels:
+        return
+        
+    if message.channel.id != read_channels[guild_id]:
+        return
+        
+    if message.content.startswith('!'):
+        return
+    await speak_text(message, message.content, message.author.id)
 
 @client.command()
 async def search(ctx, *, query: str):
