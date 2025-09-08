@@ -27,7 +27,7 @@ async def leave(ctx):
                 del read_channels[guild_id]
 
 async def auto_join(voice_channel):
-    existing_vc = discord.utils.get(voice_channel.guild.voice_client)
+    existing_vc = voice_channel.guild.voice_client
     if existing_vc is not None:
         print(f"すでに {existing_vc.channel.name} に接続中です")
         return existing_vc
@@ -40,3 +40,14 @@ async def auto_join(voice_channel):
     except Exception as e:
         print(f"VC接続エラー: {e}")
         return None
+
+async def auto_leave(voice_channel):
+    voice_client = voice_channel.guild.voice_client
+    if voice_client is not None:
+        await voice_client.disconnect()
+        guild_id = voice_channel.guild.id
+        if guild_id in voice_clients:
+            del voice_clients[guild_id]
+        if guild_id in read_channels:
+            del read_channels[guild_id]
+        print(f"{voice_channel.name} のから退出しました")

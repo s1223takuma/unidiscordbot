@@ -44,6 +44,12 @@ async def on_voice_state_update(member, before, after):
         print(f"{member} が {after.channel} に参加しました")
         print(after.channel.id)
         await vc.auto_join(after.channel)
+    elif before.channel is not None and after.channel is None:
+        if member.bot:
+            return
+        if len(before.channel.members) == 1:
+            print(f"{member} が {before.channel} から退出しました")
+            await vc.auto_leave(before.channel)
 
 
 
