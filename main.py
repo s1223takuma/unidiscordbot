@@ -10,7 +10,7 @@ from bot_setup import intents, client,invite
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
-from Voicebot.voicebot import speak_text, read_channels
+from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers
 
 
 
@@ -69,12 +69,12 @@ async def searchimage(ctx, *, query: str):
     await sr.searchimage(ctx, query=query)
 
 @client.command(name="speaker",aliases=['sp'])
-async def set_speaker(ctx, speaker_id: int = None):
-    await vc.set_speaker(ctx, speaker_id=speaker_id)
+async def speaker(ctx, speaker_id: int = None):
+    await set_speaker(ctx, speaker_id=speaker_id)
 
 @client.command(name="speakers")
-async def list_speakers(ctx):
-    await vc.list_speakers(ctx)
+async def speakers(ctx):
+    await list_speakers(ctx)
 
 @client.command(name="join")
 async def join(ctx):
