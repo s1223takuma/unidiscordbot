@@ -49,6 +49,14 @@ async def searchnews(ctx, *, query: str):
 async def searchimage(ctx, *, query: str):
     await sr.searchimage(ctx, query=query)
 
+@client.command(name="speaker",aliases=['sp'])
+async def set_speaker(ctx, speaker_id: int = None):
+    await vc.set_speaker(ctx, speaker_id=speaker_id)
+
+@client.command(name="speakers")
+async def list_speakers(ctx):
+    await vc.list_speakers(ctx)
+
 @client.command(name="join")
 async def join(ctx):
     await vc.join(ctx)
