@@ -1,6 +1,4 @@
 from Voicebot.voicebot import voice_clients,read_channels
-import discord
-import asyncio
 
 async def join(ctx):
     if ctx.author.voice is None:

@@ -1,13 +1,9 @@
 import discord
-from discord.utils import get
 from os import getenv
-from pdf2image import convert_from_path
-import os
-from math import ceil
 import asyncio
 
-import tkn
-from bot_setup import intents, client,invite
+
+from bot_setup import client
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
