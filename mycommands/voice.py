@@ -1,5 +1,7 @@
 from Voicebot.voicebot import voice_clients,read_channels
 import discord
+import asyncio
+
 async def join(ctx):
     if ctx.author.voice is None:
         await ctx.reply("ボイスチャンネルに参加してからコマンドを実行してください。")
@@ -40,6 +42,7 @@ async def auto_join(voice_channel):
     except Exception as e:
         print(f"VC接続エラー: {e}")
         return None
+
 
 async def auto_leave(voice_channel):
     voice_client = voice_channel.guild.voice_client

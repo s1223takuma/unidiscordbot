@@ -4,6 +4,7 @@ from os import getenv
 from pdf2image import convert_from_path
 import os
 from math import ceil
+import asyncio
 
 import tkn
 from bot_setup import intents, client,invite
@@ -11,8 +12,6 @@ from mycommands import category_manager as cc, help as hc, create_url as cu ,con
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers
-
-
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -41,7 +40,15 @@ async def on_message(message):
 @client.event
 async def on_voice_state_update(member, before, after):
     if before.channel is None and after.channel is not None:
-        await vc.auto_join(after.channel)
+        try:
+            await vc.auto_join(after.channel)
+        except discord.errors.ConnectionClosed as e:
+            print("⚠️ ボイス接続が切断されました。再試行します…")
+            await asyncio.sleep(5)
+            try:
+                await vc.auto_join(after.channel)
+            except Exception as e:
+                print(f"再接続に失敗: {e}")
     elif before.channel is not None and after.channel is None:
         if member.bot:
             return
