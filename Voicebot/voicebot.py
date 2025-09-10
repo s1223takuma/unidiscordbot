@@ -3,6 +3,7 @@ import discord
 import asyncio
 import tempfile
 from Voicebot.ttx import DEFAULT_SPEAKER, VoiceVoxTTS
+from Voicebot.clean_text import clean_text
 
 tts = VoiceVoxTTS()
 voice_clients = {}
@@ -148,7 +149,7 @@ async def say_text(ctx, *, text: str):
 async def speak_text(ctx, text: str, user_id: int):
     if len(text) > 100:
         text = text[:100] + "..."
-    text = clean_text(text)
+    text = clean_text(ctx,text)
     
     if not text.strip():
         return
@@ -183,7 +184,7 @@ async def speak_text(ctx, text: str, user_id: int):
         if voice_client.is_playing():
             while voice_client.is_playing():
                 await asyncio.sleep(0.1)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
             
         print("Starting audio playback...")
         source = discord.FFmpegPCMAudio(
@@ -217,19 +218,3 @@ def cleanup_temp_file(file_path: str, error):
         
     if error:
         print(f"Audio playback finished with error: {error}")
-
-def clean_text(text: str) -> str:
-    import re
-    
-    # URL除去
-    text = re.sub(r'https?://\S+', 'URL', text)
-    # メンション除去
-    text = re.sub(r'<@!?\d+>', 'メンション', text)
-    # チャンネル言及除去
-    text = re.sub(r'<#\d+>', 'チャンネル', text)
-    # 絵文字除去
-    text = re.sub(r'<:\w+:\d+>', '絵文字', text)
-    # 改行を句点に
-    text = text.replace('\n', '。')
-    
-    return text.strip()

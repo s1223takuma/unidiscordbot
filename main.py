@@ -8,6 +8,7 @@ from mycommands import category_manager as cc, help as hc, create_url as cu ,con
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker
+from Voicebot.clean_text import add_word
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -102,6 +103,10 @@ async def speaker(ctx, member_id,speaker_id: int = None):
 @client.command(name="speakers")
 async def speakers(ctx):
     await list_speakers(ctx)
+
+@client.command(name="addword")
+async def addword(ctx,word,kana):
+    await add_word(ctx,word=word,kana=kana)
 
 @client.command(name="join")
 async def join(ctx):
