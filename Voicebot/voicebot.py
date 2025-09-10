@@ -15,7 +15,6 @@ async def set_speaker(ctx, speaker_id: int = None):
         await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
         return
         
-    # 話者IDの範囲チェック（0-46程度）
     if not (0 <= speaker_id <= 88):
         await ctx.send("❌ 話者IDは0-88の範囲で指定してください。")
         return

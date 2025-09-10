@@ -2,7 +2,7 @@ import discord
 
 async def contact(ctx,*,inquiry):
     print(inquiry)
-    managementrole = discord.utils.get(ctx.guild.roles, name='officers (example)')
+    managementrole = discord.utils.get(ctx.guild.roles, name='bots')
     overwrites = {
         ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
         ctx.author: discord.PermissionOverwrite(read_messages=True),
