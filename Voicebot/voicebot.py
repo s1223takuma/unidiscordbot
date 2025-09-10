@@ -12,7 +12,7 @@ speaker_settings = {}
 async def set_speaker(ctx, speaker_id: int = None):
     if speaker_id is None:
         current = speaker_settings.get(ctx.author.id, DEFAULT_SPEAKER)
-        await ctx.send(f"🎤 現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
+        await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
         return
         
     # 話者IDの範囲チェック（0-46程度）
@@ -22,7 +22,22 @@ async def set_speaker(ctx, speaker_id: int = None):
         
     speaker_settings[ctx.author.id] = speaker_id
     await ctx.send(f"✅ 話者を ID:{speaker_id} に設定しました！")
+    print(speaker_settings)
 
+async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
+    if ctx.author.guild_permissions.administrator:
+        if speaker_id is None:
+            current = speaker_settings.get(ctx.author.id, DEFAULT_SPEAKER)
+            await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
+            return
+            
+        if not (0 <= speaker_id <= 88):
+            await ctx.send("❌ 話者IDは0-88の範囲で指定してください。")
+            return
+            
+        speaker_settings[int(member_id)] = speaker_id
+        await ctx.send(f"話者を ID:{speaker_id} に設定しました！")
+    print(speaker_settings)
 
 async def list_speakers(ctx):
     speaker_info = """

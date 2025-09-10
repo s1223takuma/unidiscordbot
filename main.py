@@ -7,7 +7,7 @@ from bot_setup import client
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
-from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers
+from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -74,6 +74,10 @@ async def searchimage(ctx, *, query: str):
 @client.command(name="speaker",aliases=['sp'])
 async def speaker(ctx, speaker_id: int = None):
     await set_speaker(ctx, speaker_id=speaker_id)
+
+@client.command(name="adminspeaker",aliases=['asp'])
+async def speaker(ctx, member_id,speaker_id: int = None):
+    await admin_set_speaker(ctx,member_id=member_id,speaker_id=speaker_id)
 
 @client.command(name="speakers")
 async def speakers(ctx):
