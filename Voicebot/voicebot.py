@@ -158,6 +158,7 @@ async def speak_text(ctx, text: str, user_id: int):
     
     if not voice_client or not voice_client.is_connected():
         return
+        
     speaker_id = speaker_settings.get(user_id, DEFAULT_SPEAKER)
     print(f"Generating audio for: {text[:20]}...")
     audio_data = await tts.generate_audio(text, speaker_id)
@@ -180,8 +181,9 @@ async def speak_text(ctx, text: str, user_id: int):
         file_size = os.path.getsize(temp_path)
         print(f"Temp file size: {file_size} bytes")
         if voice_client.is_playing():
-            voice_client.stop()
-            await asyncio.sleep(0.5)
+            while voice_client.is_playing():
+                await asyncio.sleep(0.1)
+            await asyncio.sleep(1)
             
         print("Starting audio playback...")
         source = discord.FFmpegPCMAudio(

@@ -1,7 +1,7 @@
 import discord
 from os import getenv
 import asyncio
-
+from collections import deque
 
 from bot_setup import client
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
@@ -11,6 +11,10 @@ from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speaker
 
 TOKEN = getenv('Discord_TOKEN')
 
+# メッセージキュー
+message_queue = deque()
+is_speaking = False
+
 @client.event
 async def on_message(message):
     await observemessage.send_observe_message(message)
@@ -19,7 +23,7 @@ async def on_message(message):
     await client.process_commands(message)
     await pdf_handler.open_pdf(message)
     if message.author.bot:
-            return
+        return
             
     guild_id = message.guild.id if message.guild else None
     
@@ -31,7 +35,23 @@ async def on_message(message):
         
     if message.content.startswith('!'):
         return
-    await speak_text(message, message.content, message.author.id)
+    
+    message_queue.append((message, message.content, message.author.id))
+    
+    await process_queue()
+
+async def process_queue():
+    global is_speaking
+    
+    if is_speaking or not message_queue:
+        return
+        
+    is_speaking = True
+    
+    while message_queue:
+        message, content, author_id = message_queue.popleft()
+        await speak_text(message, content, author_id)
+    is_speaking = False
 
 @client.event
 async def on_voice_state_update(member, before, after):
