@@ -33,11 +33,11 @@ async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
             current = bs.voice_setting.get(ctx.author.id, DEFAULT_SPEAKER)
             await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
             return
-            
+
         if not (0 <= speaker_id <= 88):
             await ctx.send("❌ 話者IDは0-88の範囲で指定してください。")
             return
-            
+
         bs.voice_setting[int(member_id)] = speaker_id
         await ctx.send(f"話者を ID:{speaker_id} に設定しました！")
     print(bs.voice_setting)

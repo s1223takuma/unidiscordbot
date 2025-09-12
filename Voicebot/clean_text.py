@@ -52,9 +52,7 @@ def clean_text(ctx,text: str) -> str:
     text = re.sub(r'<#\d+>', 'チャンネル', text)
     # 絵文字除去
     text = re.sub(r'<:\w+:\d+>', '絵文字', text)
-
-    text = advanced_convert(ctx,text)
     # 改行を句点に
     text = text.replace('\n', '。')
-    
+    text = advanced_convert(ctx,text)
     return text.strip()
