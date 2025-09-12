@@ -1,4 +1,7 @@
 import re
+import json
+import os
+import bot_setup as bs
 # よく使われる英単語の読み方
 word_to_kana = {
     'discord': 'ディスコード',
@@ -19,18 +22,18 @@ word_to_kana = {
     'js': 'ジェーエス',
     'json': 'ジェーソン'
 }
-guild_to_kana = {}
 
 async def add_word(ctx,word,kana):
     guild_id = ctx.guild.id
-    if guild_id not in guild_to_kana:
-        guild_to_kana[guild_id] = {}  # ← ここで初期化
-    guild_to_kana[guild_id][word] = kana
-    await ctx.reply(f'単語を追加しました: {word} -> {kana}{guild_to_kana,word_to_kana}')
+    if guild_id not in bs.guild_to_kana:
+        bs.guild_to_kana[guild_id] = {}
+    bs.guild_to_kana[guild_id][word] = kana
+    await ctx.reply(f'単語を追加しました: {word} -> {kana}{bs.guild_to_kana,word_to_kana}')
+
 
 def advanced_convert(ctx,text):
-    if ctx.guild and ctx.guild.id in guild_to_kana:
-        for word, kana in guild_to_kana[ctx.guild.id].items():
+    if ctx.guild and ctx.guild.id in bs.guild_to_kana:
+        for word, kana in bs.guild_to_kana[ctx.guild.id].items():
             text = re.sub(re.escape(word), kana, text, flags=re.IGNORECASE)
     for word, kana in word_to_kana.items():
         text = re.sub(re.escape(word), kana, text, flags=re.IGNORECASE)
