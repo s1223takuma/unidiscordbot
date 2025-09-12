@@ -72,7 +72,7 @@ async def on_voice_state_update(member, before, after):
     elif before.channel is not None and after.channel is None:
         if member.bot:
             return
-        await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。",0)
+        await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね",0)
         if len(before.channel.members) == 1:
             await vc.auto_leave(before.channel)
     elif before.channel != after.channel:
