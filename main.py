@@ -112,7 +112,7 @@ async def speakers(ctx):
 async def randomspeaker(ctx):
     await random_speaker(ctx)
 
-@client.command(name="addword")
+@client.command(name="addword",aleiases=['aw'])
 async def addword(ctx,word,kana):
     await add_word(ctx,word=word,kana=kana)
 
