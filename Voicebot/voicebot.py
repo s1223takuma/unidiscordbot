@@ -2,17 +2,19 @@ import os
 import discord
 import asyncio
 import tempfile
+import json
+
 from Voicebot.ttx import DEFAULT_SPEAKER, VoiceVoxTTS
 from Voicebot.clean_text import clean_text
+import bot_setup as bs
 
 tts = VoiceVoxTTS()
 voice_clients = {}
 read_channels = {}
-speaker_settings = {}
 
 async def set_speaker(ctx, speaker_id: int = None):
     if speaker_id is None:
-        current = speaker_settings.get(ctx.author.id, DEFAULT_SPEAKER)
+        current = bs.voice_setting.get(ctx.author.id, DEFAULT_SPEAKER)
         await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
         return
         
@@ -20,14 +22,15 @@ async def set_speaker(ctx, speaker_id: int = None):
         await ctx.send("❌ 話者IDは0-88の範囲で指定してください。")
         return
         
-    speaker_settings[ctx.author.id] = speaker_id
+    bs.voice_setting[ctx.author.id] = speaker_id
+    with open("data/voice_setting.json", 'w', encoding='utf-8') as f:
+        json.dump({str(gid): spk for gid, spk in bs.voice_setting.items()}, f, ensure_ascii=False, indent=4)
     await ctx.send(f"✅ 話者を ID:{speaker_id} に設定しました！")
-    print(speaker_settings)
 
 async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
     if ctx.author.guild_permissions.administrator:
         if speaker_id is None:
-            current = speaker_settings.get(ctx.author.id, DEFAULT_SPEAKER)
+            current = bs.voice_setting.get(ctx.author.id, DEFAULT_SPEAKER)
             await ctx.send(f"現在の話者ID: {current}\n`!speaker <ID>` で変更できます。")
             return
             
@@ -35,9 +38,9 @@ async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
             await ctx.send("❌ 話者IDは0-88の範囲で指定してください。")
             return
             
-        speaker_settings[int(member_id)] = speaker_id
+        bs.voice_setting[int(member_id)] = speaker_id
         await ctx.send(f"話者を ID:{speaker_id} に設定しました！")
-    print(speaker_settings)
+    print(bs.voice_setting)
 
 async def list_speakers(ctx):
     speaker_info = """
@@ -160,7 +163,7 @@ async def speak_text(ctx, text: str, user_id: int):
     if not voice_client or not voice_client.is_connected():
         return
         
-    speaker_id = speaker_settings.get(user_id, DEFAULT_SPEAKER)
+    speaker_id = bs.voice_setting.get(user_id, DEFAULT_SPEAKER)
     print(f"Generating audio for: {text[:20]}...")
     audio_data = await tts.generate_audio(text, speaker_id)
     
