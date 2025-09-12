@@ -28,7 +28,10 @@ async def add_word(ctx,word,kana):
     if guild_id not in bs.guild_to_kana:
         bs.guild_to_kana[guild_id] = {}
     bs.guild_to_kana[guild_id][word] = kana
-    await ctx.reply(f'単語を追加しました: {word} -> {kana}{bs.guild_to_kana,word_to_kana}')
+    path = "data/guild_to_kana.json"
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump({str(gid): words for gid, words in bs.guild_to_kana.items()}, f, ensure_ascii=False, indent=4)
+    await ctx.reply(f'単語を追加しました: {word} -> {kana}')
 
 
 def advanced_convert(ctx,text):
