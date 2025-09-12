@@ -19,11 +19,9 @@ async def on_ready():
         with open(word_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             bs.guild_to_kana = {int(gid): word for gid, word in data.items()}
-    print(bs.guild_to_kana)
     voice_path = "data/voice_setting.json"
     if os.path.exists(voice_path):
         with open(voice_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             bs.voice_setting = {int(gid): word for gid, word in data.items()}
-    print(bs.voice_setting)
     await client.tree.sync()

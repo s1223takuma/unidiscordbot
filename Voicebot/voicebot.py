@@ -134,7 +134,7 @@ async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
 
 async def check_speaker(ctx):
     current = bs.voice_setting.get(ctx.author.id, DEFAULT_SPEAKER)
-    await ctx.send(f"現在の話者: {voice_dict[current]}(ID:{current})")
+    await ctx.send(f"現在の話者: {voice_dict[current]} (`!sp {current}`で変更可能)")
 
 async def list_speakers(ctx):
     speaker_info = """
