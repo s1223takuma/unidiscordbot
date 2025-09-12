@@ -1,4 +1,4 @@
-from Voicebot.voicebot import voice_clients,read_channels
+from Voicebot.voicebot import voice_clients,read_channels,speak_text
 
 async def join(ctx):
     if ctx.author.voice is None:

@@ -254,42 +254,33 @@ async def speak_text(ctx, text: str, user_id: int):
     if len(text) > 100:
         text = text[:100] + "..."
     text = clean_text(ctx,text)
-    
     if not text.strip():
         return
-        
     guild_id = ctx.guild.id
     voice_client = voice_clients.get(guild_id)
-    
     if not voice_client or not voice_client.is_connected():
         return
-        
     speaker_id = bs.voice_setting.get(user_id, DEFAULT_SPEAKER)
     print(f"Generating audio for: {text[:20]}...")
     audio_data = await tts.generate_audio(text, speaker_id)
-    
     if audio_data is None:
         await ctx.send("❌ 音声生成に失敗しました。VoiceVoxサーバーが起動しているか確認してください。")
         return
-        
     print(f"Audio data size: {len(audio_data)} bytes")
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
             temp_file.write(audio_data)
             temp_path = temp_file.name
-            
         print(f"Temp file created: {temp_path}")
         if not os.path.exists(temp_path):
             print("❌ Temp file was not created")
             return
-            
         file_size = os.path.getsize(temp_path)
         print(f"Temp file size: {file_size} bytes")
         if voice_client.is_playing():
             while voice_client.is_playing():
                 await asyncio.sleep(0.1)
             await asyncio.sleep(0.5)
-            
         print("Starting audio playback...")
         source = discord.FFmpegPCMAudio(
             temp_path,
@@ -300,17 +291,13 @@ async def speak_text(ctx, text: str, user_id: int):
             source,
             after=lambda e: cleanup_temp_file(temp_path, e)
         )
-        
         print("Audio playback started successfully")
-        
     except Exception as e:
         print(f"Audio playback error (詳細): {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
-        
         if 'temp_path' in locals():
             cleanup_temp_file(temp_path, None)
-            
         await ctx.send(f"❌ 音声再生エラー: {str(e)}")
 
 def cleanup_temp_file(file_path: str, error):

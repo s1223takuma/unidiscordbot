@@ -59,6 +59,7 @@ async def on_voice_state_update(member, before, after):
     if before.channel is None and after.channel is not None:
         try:
             await vc.auto_join(after.channel)
+            await speak_text(after.channel, "こんにちは読み上げbotです。人狼もできます。よろしくお願いします。",1)
         except discord.errors.ConnectionClosed as e:
             print("⚠️ ボイス接続が切断されました。再試行します…")
             await asyncio.sleep(5)
