@@ -131,10 +131,17 @@ async def admin_set_speaker(ctx, member_id,speaker_id: int = None):
         await ctx.send(f"話者を {voice_dict[speaker_id]} に設定しました！")
     print(bs.voice_setting)
 
+async def random_speaker(ctx):
+    import random
+    speaker_id = random.randint(0, 88)
+    bs.voice_setting[ctx.author.id] = speaker_id
+    with open("data/voice_setting.json", 'w', encoding='utf-8') as f:
+        json.dump({str(gid): spk for gid, spk in bs.voice_setting.items()}, f, ensure_ascii=False, indent=4)
+    await ctx.send(f"✅ 話者をランダムに {voice_dict[speaker_id]} に設定しました！")
 
 async def check_speaker(ctx):
     current = bs.voice_setting.get(ctx.author.id, DEFAULT_SPEAKER)
-    await ctx.send(f"現在の話者: {voice_dict[current]} (`!sp {current}`で変更可能)")
+    await ctx.send(f"現在の話者: {voice_dict[current]}\n`!sp {current}`でこの声に変更ができます。")
 
 async def list_speakers(ctx):
     speaker_info = """

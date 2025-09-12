@@ -7,7 +7,7 @@ from bot_setup import client
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
-from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker
+from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
 from Voicebot.clean_text import add_word
 
 TOKEN = getenv('Discord_TOKEN')
@@ -107,6 +107,10 @@ async def checkspeaker(ctx):
 @client.command(name="speakers")
 async def speakers(ctx):
     await list_speakers(ctx)
+
+@client.command(name="randomspeaker",aliases=['rsp'])
+async def randomspeaker(ctx):
+    await random_speaker(ctx)
 
 @client.command(name="addword")
 async def addword(ctx,word,kana):
