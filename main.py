@@ -4,7 +4,7 @@ import asyncio
 from collections import deque
 
 from bot_setup import client
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
 from games.jinro.setup import setup as jinro_setup
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
@@ -95,6 +95,10 @@ async def searchnews(ctx, *, query: str):
 @client.command()
 async def searchimage(ctx, *, query: str):
     await sr.searchimage(ctx, query=query)
+
+@client.command(name="random",aliases=['rand'])
+async def randomnum(ctx,min:int,max:int):
+    await rm.randomnum(ctx,min=min,max=max)
 
 @client.command(name="speaker",aliases=['sp'])
 async def speaker(ctx, speaker_id: int = None):
