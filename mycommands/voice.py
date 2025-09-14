@@ -41,7 +41,6 @@ async def auto_join(voice_channel):
         print(f"VC接続エラー: {e}")
         return None
 
-
 async def auto_leave(voice_channel):
     voice_client = voice_channel.guild.voice_client
     if voice_client is not None:

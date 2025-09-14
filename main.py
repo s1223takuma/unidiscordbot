@@ -6,6 +6,7 @@ from collections import deque
 from bot_setup import client
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
 from games.jinro.setup import setup as jinro_setup
+import games.filegacha.gacha as gc
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
 from Voicebot.clean_text import add_word
@@ -104,6 +105,10 @@ async def speaker(ctx, speaker_id: int = None):
 @client.command(name="adminspeaker",aliases=['asp'])
 async def speaker(ctx, member_id,speaker_id: int = None):
     await admin_set_speaker(ctx,member_id=member_id,speaker_id=speaker_id)
+
+@client.command(name="filegacha",aliases=['fg'])
+async def filegacha(ctx):
+    await gc.filegacha(ctx)
 
 @client.command(name="checkspeaker",aliases=['csp'])
 async def checkspeaker(ctx):
