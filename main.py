@@ -70,11 +70,11 @@ async def on_voice_state_update(member, before, after):
             except Exception as e:
                 print(f"再接続に失敗: {e}")
     elif before.channel is not None and after.channel is None:
-        if member.bot:
-            return
-        await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね",0)
         if len(before.channel.members) == 1:
             await vc.auto_leave(before.channel)
+            return
+        if not member.bot:
+            await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね",0)
     elif before.channel != after.channel:
         if member.bot:
             return
