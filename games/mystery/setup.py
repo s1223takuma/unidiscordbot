@@ -49,8 +49,10 @@ async def setup(ctx):
     gamestatus[ctx.guild.id]["status"] = "開始"
     gamestatus[ctx.guild.id] = selectcriminal(gamestatus[ctx.guild.id])
     world_category = await ctx.guild.create_category("フィールドチャンネル")
+    await world_category.edit(position=0)
     gamestatus[ctx.guild.id]["world_category"] = world_category
     category = await ctx.guild.create_category("ミステリー(個人用チャンネル)")
+    await category.edit(position=1)
     gamestatus[ctx.guild.id]["category"] = category
     for player in gamestatus[ctx.guild.id]["players"]:
         overwrites = {
@@ -59,10 +61,8 @@ async def setup(ctx):
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
         if player == gamestatus[ctx.guild.id]["criminal"]:
-            await channel.send(f"{player.mention}あなたは犯人です。事件を起こしてください")
+            await channel.send(f"{player.mention}あなたのロールは犯人です。事件を起こしてください。")
         else:
-            await channel.send(f"{player.mention}あなたは事件に巻き込まれました。事件を解決に導いてください。")
+            await channel.send(f"{player.mention}あなたは旅館に来たお客さんです。ゆっくり羽を伸ばしてください。")
         gamestatus[ctx.guild.id]["player_channel"][player.id] = channel
     await start_game(ctx)
-    await asyncio.sleep(10)
-    await cleanup_category(ctx)
