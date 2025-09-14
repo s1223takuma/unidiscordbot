@@ -167,4 +167,12 @@ async def setup(ctx):
 async def mystery(ctx):
     await mystery_setup(ctx)
 
+@client.command()
+async def clean(ctx):
+    from games.mystery.status import gamestatus
+    from games.mystery.cleanup import cleanup_category,cleanup_channels
+    await cleanup_category(ctx)
+    await cleanup_channels(ctx)
+    del gamestatus[ctx.guild.id]
+
 client.run(TOKEN)
