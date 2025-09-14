@@ -35,6 +35,7 @@ async def setup(ctx):
         return
     await ctx.send(f"ゲームを開始します！役職を配布します。")
     category = await ctx.guild.create_category("人狼")
+    await category.edit(position=0)
     gamestatus[ctx.guild.id]["category"] = category
     overwrites = {ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
     heaven = await category.create_text_channel("天界", overwrites=overwrites)
