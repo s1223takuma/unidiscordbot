@@ -21,6 +21,14 @@ async def start_game(ctx):
             await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室2{i}号室", overwrites=overwrites)
     await gamestatus[ctx.guild.id]["admin_channel"].send("ゲームを開始します。")
     gamestatus[ctx.guild.id]["status"] = "事件発生前"
+    await introduction(ctx)
+
+async def introduction(ctx):
+    with open("games/mystery/story/introduction.json", "r", encoding="utf-8") as f:
+        story_data = json.load(f)
+    await gamestatus[ctx.guild.id]["admin_channel"].send(f"## {story_data['title']}")
+    await gamestatus[ctx.guild.id]["admin_channel"].send(f"{story_data['description']}")
     await asyncio.sleep(5)
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
+    del gamestatus[ctx.guild.id]

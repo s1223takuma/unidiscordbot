@@ -67,6 +67,7 @@ async def setup(ctx):
             player: discord.PermissionOverwrite(read_messages=True),
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
+        await category.create_text_channel(f"{player.name}-メモ", overwrites=overwrites)
         if player == gamestatus[ctx.guild.id]["criminal"]:
             await channel.send(f"{player.mention}あなたのロールは犯人です。\n開始から5ターン以内の任意のタイミングで最初の事件を起こしてください。")
         else:
