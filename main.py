@@ -4,6 +4,7 @@ import asyncio
 from collections import deque
 
 from bot_setup import client
+from games.mystery.setup import setup as mystery_setup
 import tkn
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
 from games.jinro.setup import setup as jinro_setup
@@ -161,5 +162,9 @@ async def help_command(ctx):
 @client.command(name="人狼")
 async def setup(ctx):
     await jinro_setup(ctx)
+
+@client.command(name="ミステリー",aliases=['m'])
+async def mystery(ctx):
+    await mystery_setup(ctx)
 
 client.run(TOKEN)
