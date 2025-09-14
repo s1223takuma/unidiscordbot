@@ -1,2 +1,1 @@
 gamestatus = {}
-characters_status = {}
