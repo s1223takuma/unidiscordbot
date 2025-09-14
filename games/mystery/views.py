@@ -22,7 +22,6 @@ class JoinView(View):
         else:
             gamestatus[guild_id]["players"].append(player)
             await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
-
     @discord.ui.button(label="犯人希望で参加", style=discord.ButtonStyle.red)
     async def criminal_button(self, interaction: discord.Interaction, button: Button):
         guild_id = self.ctx.guild.id

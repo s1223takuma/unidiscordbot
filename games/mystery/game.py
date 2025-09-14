@@ -21,7 +21,7 @@ async def start_game(ctx):
             guest_room = await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室20{i}号室", overwrites=overwrites)
         else:
             guest_room = await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室2{i}号室", overwrites=overwrites)
-        gamestatus[ctx.guild.id]["player_guestroom"][player.id] = guest_room
+        gamestatus[ctx.guild.id]["player_guestroom"][player.id] = guest_room.name
     await gamestatus[ctx.guild.id]["admin_channel"].send("ゲームを開始します。")
     gamestatus[ctx.guild.id]["status"] = "事件発生前"
     await asyncio.sleep(5)
@@ -34,6 +34,7 @@ async def introduction(ctx):
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"{story_data['description']}")
     first_event = await select_event(ctx,0)
     for player in gamestatus[ctx.guild.id]["players"]:
+        first_event["choices"][1]["next_location"] = gamestatus[ctx.guild.id]["player_guestroom"][player.id]
         view = selectView(ctx,first_event,player)
         await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_event["text"],view=view)
     await asyncio.sleep(10)

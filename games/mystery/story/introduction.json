@@ -12,7 +12,7 @@
                     "next_event": 2,
                     "next_location": "ロビー"
                 },
-                { "label": "自分の部屋", "next_event": 2, "next_location": "ロビー" }
+                { "label": "自分の部屋", "next_event": 2, "next_location": "自分の部屋" }
             ]
         },
         {
