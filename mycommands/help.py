@@ -18,4 +18,5 @@ async def help(ctx):
     embed.add_field(name="!addword(!aw) [単語] [読み]", value="特定の単語の読みを追加します。", inline=False)
     embed.add_field(name="!randomspeaker(!rsp)", value="ランダムに話者を設定します。", inline=False)
     embed.add_field(name="!checkspeaker(!csp)", value="現在の話者を確認します。", inline=False)
+    embed.add_field(name="!random(!rand) [最小値] [最大値]", value="指定した範囲で乱数を生成します。", inline=False)
     await ctx.send(embed=embed)
