@@ -5,6 +5,7 @@ __pycache__/
 automation/__pycache__/
 games/jinro/__pycache__/
 games/filegacha/__pycache__/
+games/filegacha/files/
 mycommands.__pycache__/
 Voicebot/__pycache__/
 *.pyc
