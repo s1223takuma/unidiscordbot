@@ -1,3 +1,5 @@
 tkn.py
 test.py
 data/*.json
+__pycache__/
+*.pyc
