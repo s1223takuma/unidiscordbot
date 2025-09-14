@@ -14,3 +14,34 @@
 ---
 
 ## ファイル構成
+```markdown
+discord/
+├── bot_setup.py
+├── main.py
+├── automation
+│   ├── observe.py
+│   └── pdf_handler.py
+├── data
+│   ├── guild_to_kana.json
+│   └── voice_setting.json
+├── games
+│   └── jinro
+│       ├── manager.py
+│       ├── selection.py
+│       ├── setup.py
+│       ├── status.py
+│       └── views.py
+├── mycommands
+│   ├── category_manager.py
+│   ├── contact.py
+│   ├── create_url.py
+│   ├── help.py
+│   ├── observe_manager.py
+│   ├── randomnum.py
+│   ├── search.py
+│   └── voice.py
+└── Voicebot
+    ├── clean_text.py
+    ├── ttx.py
+    └── voicebot.py
+```
