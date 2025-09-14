@@ -1,8 +1,12 @@
-from games.mystery.views import JoinView
-from games.mystery.status import gamestatus
 import asyncio
 import discord
 import random
+
+from games.mystery.views import JoinView
+from games.mystery.status import gamestatus
+from games.mystery.manager import start_game
+from games.mystery.cleanup import cleanup_category
+
 
 def selectcriminal(status):
     if len(status["criminals"]) == 1:
@@ -33,17 +37,20 @@ async def setup(ctx):
         "criminal":None,
         "status": "募集",
         "player_channel":{},
-        "category":None
+        "category":None,
+        "world_category":None
     }
     view = JoinView(ctx)
     await ctx.send(
         "ミステリーゲームを開始します！\n30秒間参加者を募集します。\n下のボタンから参加してください。",
         view=view
     )
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
     gamestatus[ctx.guild.id]["status"] = "開始"
     gamestatus[ctx.guild.id] = selectcriminal(gamestatus[ctx.guild.id])
-    category = await ctx.guild.create_category("ミステリー")
+    world_category = await ctx.guild.create_category("フィールドチャンネル")
+    gamestatus[ctx.guild.id]["world_category"] = world_category
+    category = await ctx.guild.create_category("ミステリー(個人用チャンネル)")
     gamestatus[ctx.guild.id]["category"] = category
     for player in gamestatus[ctx.guild.id]["players"]:
         overwrites = {
@@ -55,16 +62,7 @@ async def setup(ctx):
             await channel.send(f"{player.mention}あなたは犯人です。事件を起こしてください")
         else:
             await channel.send(f"{player.mention}あなたは事件に巻き込まれました。事件を解決に導いてください。")
-        gamestatus[ctx.guild.id]["player_channel"][player] = channel
-    print(gamestatus[ctx.guild.id]["criminal"])
+        gamestatus[ctx.guild.id]["player_channel"][player.id] = channel
+    await start_game(ctx)
     await asyncio.sleep(10)
-    await cleanup_channels(ctx)
-
-
-async def cleanup_channels(ctx):
-    guild_id = ctx.guild.id
-    category = gamestatus[guild_id].get("category")
-    if category:
-        for channel in category.channels:
-            await channel.delete()
-        await category.delete()
+    await cleanup_category(ctx)
