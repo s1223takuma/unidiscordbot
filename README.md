@@ -18,6 +18,9 @@
 discord/
 ├── bot_setup.py
 ├── main.py
+├── .gitignore
+├── README.md
+├── bot_setup.py
 ├── automation
 │   ├── observe.py
 │   └── pdf_handler.py
