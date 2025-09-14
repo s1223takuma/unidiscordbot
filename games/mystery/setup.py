@@ -4,8 +4,7 @@ import random
 
 from games.mystery.views import JoinView
 from games.mystery.status import gamestatus
-from games.mystery.manager import start_game
-from games.mystery.cleanup import cleanup_category
+from games.mystery.game import start_game
 
 
 def selectcriminal(status):
