@@ -36,6 +36,7 @@ async def setup(ctx):
         "criminal":None,
         "admin_channel":None,
         "player_channel":{},
+        "player_guestroom":{},
         "category":None,
         "world_category":None,
         "status": "募集",

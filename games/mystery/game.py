@@ -6,6 +6,7 @@ import os
 from games.mystery.status import gamestatus
 from games.mystery.cleanup import cleanup_channels,cleanup_category
 from games.mystery.manager import select_event
+from games.mystery.views import selectView
 
 async def start_game(ctx):
     overwrites = {
@@ -17,11 +18,13 @@ async def start_game(ctx):
     await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"食堂", overwrites=overwrites)
     for i,player in enumerate(gamestatus[ctx.guild.id]["players"], start=1):
         if i <= 9:
-            await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室20{i}号室", overwrites=overwrites)
+            guest_room = await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室20{i}号室", overwrites=overwrites)
         else:
-            await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室2{i}号室", overwrites=overwrites)
+            guest_room = await gamestatus[ctx.guild.id]["world_category"].create_voice_channel(f"客室2{i}号室", overwrites=overwrites)
+        gamestatus[ctx.guild.id]["player_guestroom"][player.id] = guest_room
     await gamestatus[ctx.guild.id]["admin_channel"].send("ゲームを開始します。")
     gamestatus[ctx.guild.id]["status"] = "事件発生前"
+    await asyncio.sleep(5)
     await introduction(ctx)
 
 async def introduction(ctx):
@@ -29,10 +32,11 @@ async def introduction(ctx):
         story_data = json.load(f)
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"## {story_data['title']}")
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"{story_data['description']}")
-    first_message = await select_event(ctx,0)
+    first_event = await select_event(ctx,0)
     for player in gamestatus[ctx.guild.id]["players"]:
-        await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_message["text"])
-    await asyncio.sleep(5)
+        view = selectView(ctx,first_event,player)
+        await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_event["text"],view=view)
+    await asyncio.sleep(10)
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]

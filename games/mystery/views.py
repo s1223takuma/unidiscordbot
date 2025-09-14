@@ -2,6 +2,7 @@ import discord
 from discord.ui import View, Button
 
 from games.mystery.status import gamestatus
+from games.mystery.manager import move_user
 
 
 class JoinView(View):
@@ -36,3 +37,16 @@ class JoinView(View):
             gamestatus[guild_id]["criminals"].append(player)
             gamestatus[guild_id]["players"].append(player)
             await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
+
+class selectView(View):
+    def __init__(self, ctx, event, player):
+        super().__init__(timeout=None)
+        for choice in event.get("choices", []):
+            button = Button(label=choice["label"], style=discord.ButtonStyle.green)
+            button.callback = self.make_callback(ctx, player, choice["next_location"])
+            self.add_item(button)
+    def make_callback(self, ctx, player, next_location):
+        async def callback(interaction: discord.Interaction):
+            await interaction.response.defer(ephemeral=True)
+            await move_user(ctx,player,next_location)
+        return callback
