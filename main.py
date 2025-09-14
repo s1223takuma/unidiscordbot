@@ -62,7 +62,6 @@ async def on_voice_state_update(member, before, after):
             await vc.auto_join(after.channel)
             if member.bot:
                 return
-            await after.channel.send(f"{member.mention}読み上げするチャットはここです")
             await speak_text(after.channel, f"{member.display_name}さんこんにちは。私は読み上げbotです。",0)
         except discord.errors.ConnectionClosed as e:
             print("⚠️ ボイス接続が切断されました。再試行します…")
