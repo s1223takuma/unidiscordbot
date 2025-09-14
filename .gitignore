@@ -3,3 +3,7 @@ test.py
 data/*.json
 __pycache__/
 *.pyc
+automation/__pycache__/
+games/jinro/__pycache__/
+mycommands.__pycache__/
+Voicebot/__pycache__/
