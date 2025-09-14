@@ -21,20 +21,20 @@ discord/
 ├── .gitignore
 ├── README.md
 ├── bot_setup.py
-├── automation
+├── automation/
 │   ├── observe.py
 │   └── pdf_handler.py
-├── data
+├── data/
 │   ├── guild_to_kana.json
 │   └── voice_setting.json
-├── games
-│   └── jinro
+├── games/
+│   └── jinro/
 │       ├── manager.py
 │       ├── selection.py
 │       ├── setup.py
 │       ├── status.py
 │       └── views.py
-├── mycommands
+├── mycommands/
 │   ├── category_manager.py
 │   ├── contact.py
 │   ├── create_url.py
@@ -43,7 +43,7 @@ discord/
 │   ├── randomnum.py
 │   ├── search.py
 │   └── voice.py
-└── Voicebot
+└── Voicebot/
     ├── clean_text.py
     ├── ttx.py
     └── voicebot.py

@@ -12,7 +12,6 @@ from Voicebot.clean_text import add_word
 
 TOKEN = getenv('Discord_TOKEN')
 
-# メッセージキュー
 message_queue = deque()
 is_speaking = False
 
@@ -81,8 +80,6 @@ async def on_voice_state_update(member, before, after):
         if len(before.channel.members) == 1:
             await vc.auto_leave(before.channel)
             await vc.auto_join(after.channel)
-
-
 
 @client.command()
 async def search(ctx, *, query: str):
@@ -155,6 +152,5 @@ async def help_command(ctx):
 @client.command(name="人狼")
 async def setup(ctx):
     await jinro_setup(ctx)
-
 
 client.run(TOKEN)
