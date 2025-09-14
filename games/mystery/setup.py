@@ -35,10 +35,11 @@ async def setup(ctx):
         "players": [],
         "criminals":[],
         "criminal":None,
-        "status": "募集",
+        "admin_channel":None,
         "player_channel":{},
         "category":None,
-        "world_category":None
+        "world_category":None,
+        "status": "募集",
     }
     view = JoinView(ctx)
     await ctx.send(
@@ -51,6 +52,13 @@ async def setup(ctx):
     world_category = await ctx.guild.create_category("フィールドチャンネル")
     await world_category.edit(position=0)
     gamestatus[ctx.guild.id]["world_category"] = world_category
+    overwrites = {
+        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+    }
+    for player in gamestatus[ctx.guild.id]["players"]:
+        overwrites[player] = discord.PermissionOverwrite(read_messages=True)
+    admin = await world_category.create_text_channel("admin_channel",overwrites=overwrites)
+    gamestatus[ctx.guild.id]["admin_channel"] = admin
     category = await ctx.guild.create_category("ミステリー(個人用チャンネル)")
     await category.edit(position=1)
     gamestatus[ctx.guild.id]["category"] = category

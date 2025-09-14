@@ -13,4 +13,5 @@ async def cleanup_channels(ctx):
     category = gamestatus[guild_id].get("world_category")
     if category:
         for channel in category.channels:
-            await channel.delete()
+            if channel.name != "admin_channel":
+                await channel.delete()
