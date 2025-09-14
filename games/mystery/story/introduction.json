@@ -5,55 +5,32 @@
     "events": [
         {
             "id": 1,
-            "text": "受付で館内の説明を受けます。どこに行きますか？",
+            "text": "あなたはチェックインを済ませました。どこに移動しますか？",
             "choices": [
-                {
-                    "label": "ロビーでくつろぐ",
-                    "next_event": 2
-                },
-                {
-                    "label": "自分の部屋に向かう",
-                    "next_event": 3
-                }
+                { "label": "ロビー", "next_event": 2 },
+                { "label": "自分の部屋", "next_event": 2 }
             ]
         },
         {
             "id": 2,
-            "text": "ロビーには他の宿泊客がいます。話しかけますか？",
+            "text": "夜になりました。館内を探索しますか？",
             "choices": [
-                {
-                    "label": "話しかける",
-                    "next_event": 4
-                },
-                {
-                    "label": "無視する",
-                    "next_event": 5
-                }
+                { "label": "探索する", "next_event": 3 },
+                { "label": "部屋で休む", "next_event": 4 }
             ]
         },
         {
             "id": 3,
-            "text": "自分の部屋に入り、荷物を置きます。休むか探索するか選べます。",
+            "text": "廊下で何か音がしました。どうしますか？",
             "choices": [
-                {
-                    "label": "部屋で休む",
-                    "next_event": 5
-                },
-                {
-                    "label": "部屋を探索する",
-                    "next_event": 6
-                }
+                { "label": "近づく", "next_event": "murderoccurred.json" },
+                { "label": "無視する", "next_event": 4 }
             ]
         },
         {
             "id": 4,
-            "text": "他の宿泊客から噂を聞きました。事件の予感がします。",
-            "choices": [
-                {
-                    "label": "探索を開始する",
-                    "next_event": 6
-                }
-            ]
+            "text": "安全に夜を過ごしました。ゲームは次の章へ進みます。",
+            "choices": []
         },
         {
             "id": 5,

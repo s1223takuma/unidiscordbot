@@ -5,6 +5,7 @@ import os
 
 from games.mystery.status import gamestatus
 from games.mystery.cleanup import cleanup_channels,cleanup_category
+from games.mystery.manager import select_event
 
 async def start_game(ctx):
     overwrites = {
@@ -28,6 +29,9 @@ async def introduction(ctx):
         story_data = json.load(f)
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"## {story_data['title']}")
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"{story_data['description']}")
+    first_message = await select_event(ctx,0)
+    for player in gamestatus[ctx.guild.id]["players"]:
+        await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_message["text"])
     await asyncio.sleep(5)
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
