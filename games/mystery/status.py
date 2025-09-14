@@ -1,0 +1,2 @@
+gamestatus = {}
+characters_status = {}
