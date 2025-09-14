@@ -37,7 +37,7 @@ class JoinView(View):
             gamestatus[guild_id]["players"].append(player)
             await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
 
-class selectView(View):
+class SelectView(View):
     def __init__(self, ctx, event, player):
         super().__init__(timeout=None)
         for choice in event.get("choices", []):
@@ -47,5 +47,8 @@ class selectView(View):
     def make_callback(self, ctx, player, next_location):
         async def callback(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
-            await move_user(ctx,player,next_location)
+            resolved_location = (
+                gamestatus[ctx.guild.id]["player_guestroom"][player.id] if next_location == "自分の部屋" else next_location
+            )
+            await move_user(ctx, player, resolved_location)
         return callback

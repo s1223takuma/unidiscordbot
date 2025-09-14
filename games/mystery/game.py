@@ -6,7 +6,7 @@ import os
 from games.mystery.status import gamestatus
 from games.mystery.cleanup import cleanup_channels,cleanup_category
 from games.mystery.manager import select_event
-from games.mystery.views import selectView
+from games.mystery.views import SelectView
 
 async def start_game(ctx):
     overwrites = {
@@ -34,10 +34,6 @@ async def introduction(ctx):
     await gamestatus[ctx.guild.id]["admin_channel"].send(f"{story_data['description']}")
     first_event = await select_event(ctx,0)
     for player in gamestatus[ctx.guild.id]["players"]:
-        first_event["choices"][1]["next_location"] = gamestatus[ctx.guild.id]["player_guestroom"][player.id]
-        view = selectView(ctx,first_event,player)
+        view = SelectView(ctx,first_event,player)
         await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_event["text"],view=view)
     await asyncio.sleep(10)
-    await cleanup_category(ctx)
-    await cleanup_channels(ctx)
-    del gamestatus[ctx.guild.id]

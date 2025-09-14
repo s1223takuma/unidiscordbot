@@ -7,12 +7,16 @@
             "id": 1,
             "text": "あなたはチェックインを済ませました。どこに移動しますか？",
             "choices": [
-                { 
-                    "label": "ロビー", 
+                {
+                    "label": "ロビー",
                     "next_event": 2,
                     "next_location": "ロビー"
                 },
-                { "label": "自分の部屋", "next_event": 2, "next_location": "自分の部屋" }
+                {
+                    "label": "自分の部屋",
+                    "next_event": 2,
+                    "next_location": "自分の部屋"
+                }
             ]
         },
         {
@@ -43,55 +47,6 @@
                 {
                     "label": "次へ",
                     "next_event": 6
-                }
-            ]
-        },
-        {
-            "id": 6,
-            "text": "夜になりました。犯人は任意のタイミングで事件を起こせます。",
-            "choices": [
-                {
-                    "label": "事件が発生した",
-                    "next_event": "murder_occurred.json",
-                    "role_required": "criminal"
-                },
-                {
-                    "label": "探索を続ける",
-                    "next_event": 7
-                }
-            ]
-        },
-        {
-            "id": 7,
-            "text": "旅館内を探索中です。怪しい物音が聞こえます…",
-            "choices": [
-                {
-                    "label": "確認する",
-                    "next_event": 8
-                },
-                {
-                    "label": "無視する",
-                    "next_event": 9
-                }
-            ]
-        },
-        {
-            "id": 8,
-            "text": "怪しい部屋を発見しました。何か証拠があるかもしれません。",
-            "choices": [
-                {
-                    "label": "次へ",
-                    "next_event": "murder_occurred.json"
-                }
-            ]
-        },
-        {
-            "id": 9,
-            "text": "探索を続けますが、何も起きません。少し休むことにします。",
-            "choices": [
-                {
-                    "label": "次へ",
-                    "next_event": 7
                 }
             ]
         }
