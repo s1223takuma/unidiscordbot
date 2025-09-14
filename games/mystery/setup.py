@@ -69,7 +69,7 @@ async def setup(ctx):
         }
         channel = await category.create_text_channel(f"{player.name}-chat", overwrites=overwrites)
         if player == gamestatus[ctx.guild.id]["criminal"]:
-            await channel.send(f"{player.mention}あなたのロールは犯人です。事件を起こしてください。")
+            await channel.send(f"{player.mention}あなたのロールは犯人です。\n開始から5ターン以内の任意のタイミングで最初の事件を起こしてください。")
         else:
             await channel.send(f"{player.mention}あなたは旅館に来たお客さんです。ゆっくり羽を伸ばしてください。")
         gamestatus[ctx.guild.id]["player_channel"][player.id] = channel
