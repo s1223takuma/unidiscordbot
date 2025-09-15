@@ -9,7 +9,9 @@ from games.mystery.setup import setup as mystery_setup
 import tkn
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
 from games.jinro.setup import setup as jinro_setup
+from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
+from games.mystery.status import gamestatus as mystery_status
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
 from Voicebot.clean_text import add_word
@@ -59,13 +61,13 @@ async def process_queue():
 
 @client.event
 async def on_voice_state_update(member, before, after):
+    # ユーザーがVCに入った
     if before.channel is None and after.channel is not None:
         try:
             await vc.auto_join(after.channel)
-            if member.bot:
-                return
-            await speak_text(after.channel, f"{member.display_name}さんこんにちは。私は読み上げbotです。",0)
-        except discord.errors.ConnectionClosed as e:
+            if not member.bot:
+                await speak_text(after.channel, f"{member.display_name}さんこんにちは。私は読み上げbotです。", 0)
+        except discord.errors.ConnectionClosed:
             print("⚠️ ボイス接続が切断されました。再試行します…")
             await asyncio.sleep(5)
             try:
@@ -73,17 +75,17 @@ async def on_voice_state_update(member, before, after):
             except Exception as e:
                 print(f"再接続に失敗: {e}")
     elif before.channel is not None and after.channel is None:
-        if len(before.channel.members) == 1:
+        if before.channel and len(before.channel.members) == 1:
             await vc.auto_leave(before.channel)
-            return
-        if not member.bot:
-            await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね",0)
+        elif not member.bot:
+            await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね", 0)
     elif before.channel != after.channel:
-        if member.bot:
-            return
-        if len(before.channel.members) == 1:
-            await vc.auto_leave(before.channel)
-            await vc.auto_join(after.channel)
+        if not member.bot:
+            world_category = mystery_status.get(member.guild.id, {}).get("world_category")
+            wolf_category = jinro_status.get(member.guild.id,{}).get("category")
+            if before.channel and len(before.channel.members) == 1 and after.channel not in world_category.channels and after.channel not in wolf_category.channels:
+                await vc.auto_leave(before.channel)
+                await vc.auto_join(after.channel)
 
 @client.command()
 async def search(ctx, *, query: str):
