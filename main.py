@@ -170,6 +170,8 @@ async def mystery(ctx):
 
 @client.command()
 async def clean(ctx):
+    if ctx.author.id != tkn.developer_id:
+        return
     from games.mystery.status import gamestatus
     from games.mystery.cleanup import cleanup_category,cleanup_channels
     await cleanup_category(ctx)

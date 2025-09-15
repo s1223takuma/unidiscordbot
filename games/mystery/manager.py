@@ -22,6 +22,7 @@ async def move_user(ctx, player, channelname):
     if player.voice and player.voice.channel:
         try:
             await player.move_to(target_channel)
+            await target_channel.send("test")
         except discord.errors.HTTPException:
             await ctx.send(f"{player.display_name} を {channelname} に移動できませんでした。")
     else:

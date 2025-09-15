@@ -37,6 +37,7 @@ class JoinView(View):
             gamestatus[guild_id]["players"].append(player)
             await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
 
+
 class SelectView(View):
     def __init__(self, ctx, event, player):
         super().__init__(timeout=None)
@@ -52,4 +53,7 @@ class SelectView(View):
             )
             location_status[player.id] = resolved_location
             await move_user(ctx, player, resolved_location)
+            for item in self.children:
+                item.disabled = True
+            await interaction.message.edit(content=f"あなたは{resolved_location}に移動しました。",view=self)
         return callback
