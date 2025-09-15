@@ -61,7 +61,6 @@ async def process_queue():
 
 @client.event
 async def on_voice_state_update(member, before, after):
-    # ユーザーがVCに入った
     if before.channel is None and after.channel is not None:
         try:
             await vc.auto_join(after.channel)
@@ -113,7 +112,7 @@ async def speaker(ctx, member_id,speaker_id: int = None):
 
 @client.command(name="filegacha",aliases=['fg'])
 async def filegacha(ctx):
-    if ctx.guild.id != tkn.miuchi_ID:
+    if ctx.guild.id not in tkn.miuchi_ID:
         await ctx.send("このコマンドは特定のサーバーでのみ使用できます。")
         return
     await gc.filegacha(ctx)
@@ -179,6 +178,5 @@ async def clean(ctx):
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
-    sys.exit()
 
 client.run(TOKEN)
