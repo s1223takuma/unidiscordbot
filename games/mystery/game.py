@@ -3,7 +3,7 @@ import asyncio
 import json
 import os
 
-from games.mystery.status import gamestatus
+from games.mystery.status import gamestatus,location_status
 from games.mystery.cleanup import cleanup_channels,cleanup_category
 from games.mystery.manager import select_event
 from games.mystery.views import SelectView
@@ -36,4 +36,5 @@ async def introduction(ctx):
     for player in gamestatus[ctx.guild.id]["players"]:
         view = SelectView(ctx,first_event,player)
         await gamestatus[ctx.guild.id]["player_channel"][player.id].send(first_event["text"],view=view)
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
+    print(location_status)

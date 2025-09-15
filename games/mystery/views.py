@@ -1,7 +1,7 @@
 import discord
 from discord.ui import View, Button
 
-from games.mystery.status import gamestatus
+from games.mystery.status import gamestatus,location_status
 from games.mystery.manager import move_user
 
 
@@ -50,5 +50,6 @@ class SelectView(View):
             resolved_location = (
                 gamestatus[ctx.guild.id]["player_guestroom"][player.id] if next_location == "自分の部屋" else next_location
             )
+            location_status[player.id] = resolved_location
             await move_user(ctx, player, resolved_location)
         return callback

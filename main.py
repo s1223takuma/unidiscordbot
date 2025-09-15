@@ -2,6 +2,7 @@ import discord
 from os import getenv
 import asyncio
 from collections import deque
+import sys
 
 from bot_setup import client
 from games.mystery.setup import setup as mystery_setup
@@ -174,5 +175,6 @@ async def clean(ctx):
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
+    sys.exit()
 
 client.run(TOKEN)
