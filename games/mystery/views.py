@@ -37,7 +37,6 @@ class JoinView(View):
             gamestatus[guild_id]["players"].append(player)
             await interaction.response.send_message(f"{player.display_name} が参加しました！", ephemeral=False)
 
-
 class SelectView(View):
     def __init__(self, ctx, event, player):
         super().__init__(timeout=None)

@@ -1,7 +1,6 @@
 import discord
 import asyncio
 import json
-import os
 
 from games.mystery.status import gamestatus,location_status
 from games.mystery.cleanup import cleanup_channels,cleanup_category
