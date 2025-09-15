@@ -168,7 +168,7 @@ async def setup(ctx):
 async def mystery(ctx):
     await mystery_setup(ctx)
 
-@client.command()
+@client.command(name="c")
 async def clean(ctx):
     if ctx.author.id != tkn.developer_id:
         return

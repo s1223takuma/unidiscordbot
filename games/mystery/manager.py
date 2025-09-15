@@ -21,6 +21,9 @@ async def move_user(ctx, player, channelname):
         return
     if player.voice and player.voice.channel:
         try:
+            overwrites = target_channel.overwrites
+            overwrites[player] = discord.PermissionOverwrite(read_messages=True,send_messages=True)
+            await target_channel.edit(overwrites=overwrites)
             await player.move_to(target_channel)
             await target_channel.send("test")
         except discord.errors.HTTPException:

@@ -51,7 +51,7 @@ class SelectView(View):
             resolved_location = (
                 gamestatus[ctx.guild.id]["player_guestroom"][player.id] if next_location == "自分の部屋" else next_location
             )
-            location_status[player.id] = resolved_location
+            location_status.setdefault(next_location, []).append(player)
             await move_user(ctx, player, resolved_location)
             for item in self.children:
                 item.disabled = True
