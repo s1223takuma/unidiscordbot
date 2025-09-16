@@ -16,25 +16,43 @@
 ## ファイル構成
 ```markdown
 discord/
-├── bot_setup.py
-├── main.py
-├── .gitignore
-├── README.md
-├── bot_setup.py
-├── automation/
+├── automation
 │   ├── observe.py
 │   └── pdf_handler.py
-├── data/
+├── bot_setup.py
+├── data
 │   ├── guild_to_kana.json
 │   └── voice_setting.json
-├── games/
-│   └── jinro/
+├── games
+│   ├── filegacha
+│   │   ├── files
+│   │   │   ├── a.py
+│   │   │   ├── b.py
+│   │   │   ├── c.py
+│   │   │   ├── d.py
+│   │   │   ├── e.py
+│   │   │   └── s.py
+│   │   └── gacha.py
+│   ├── jinro
+│   │   ├── manager.py
+│   │   ├── selection.py
+│   │   ├── setup.py
+│   │   ├── status.py
+│   │   └── views.py
+│   └── mystery
+│       ├── cleanup.py
+│       ├── event
+│       │   └── event.json
+│       ├── game.py
 │       ├── manager.py
-│       ├── selection.py
 │       ├── setup.py
 │       ├── status.py
+│       ├── story
+│       │   ├── introduction.json
+│       │   └── murderoccurred.json
 │       └── views.py
-├── mycommands/
+├── main.py
+├── mycommands
 │   ├── category_manager.py
 │   ├── contact.py
 │   ├── create_url.py
@@ -43,7 +61,10 @@ discord/
 │   ├── randomnum.py
 │   ├── search.py
 │   └── voice.py
-└── Voicebot/
+├── README.md
+├── test.py
+├── tkn.py
+└── Voicebot
     ├── clean_text.py
     ├── ttx.py
     └── voicebot.py
