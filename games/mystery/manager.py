@@ -15,18 +15,20 @@ async def move_user(ctx, player, channelname):
     for channel in category.channels:
         if channel.name == channelname and isinstance(channel, discord.VoiceChannel):
             target_channel = channel
-            break
+        elif isinstance(channel, discord.TextChannel) and channel.name == channelname:
+            target_text_channel = channel
     if not target_channel:
         await ctx.send(f"{channelname} が見つかりませんでした。")
         return
-    if player.voice and player.voice.channel:
-        try:
-            overwrites = target_channel.overwrites
-            overwrites[player] = discord.PermissionOverwrite(read_messages=True,send_messages=True)
-            await target_channel.edit(overwrites=overwrites)
+    try:
+        overwrites = target_channel.overwrites
+        overwrites[player] = discord.PermissionOverwrite(read_messages=True,send_messages=True)
+        await target_channel.edit(overwrites=overwrites)
+        await target_text_channel.edit(overwrites=overwrites)
+        if player.voice and player.voice.channel:
             await player.move_to(target_channel)
-            await target_channel.send("test")
-        except discord.errors.HTTPException:
-            await ctx.send(f"{player.display_name} を {channelname} に移動できませんでした。")
-    else:
-        await ctx.send(f"{player.display_name} さん、まずボイスチャンネルに入ってください。")
+        else:
+            await ctx.send(f"{player.display_name} さん、まずボイスチャンネルに入ってください。")
+        await target_channel.send("test")
+    except discord.errors.HTTPException:
+        await ctx.send(f"{player.display_name} を {channelname} に移動できませんでした。")
