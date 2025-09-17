@@ -252,7 +252,7 @@ async def say_text(ctx, *, text: str):
 
 async def speak_text(ctx, text: str, user_id: int):
     if len(text) > 100:
-        text = text[:100] + "..."
+        text = text[:100] + "...以下省略"
     text = clean_text(ctx,text)
     if not text.strip():
         return

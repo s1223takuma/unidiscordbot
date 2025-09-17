@@ -77,7 +77,7 @@ async def on_voice_state_update(member, before, after):
         if before.channel and len(before.channel.members) == 1:
             await vc.auto_leave(before.channel)
         elif not member.bot:
-            await speak_text(before.channel, f"{member.display_name}さん楽しかったよ。またね", 0)
+            await speak_text(before.channel, f"{member.display_name}さんが退出しました", 0)
     elif before.channel != after.channel:
         if not member.bot:
             world_category = mystery_status.get(member.guild.id, {}).get("world_category")

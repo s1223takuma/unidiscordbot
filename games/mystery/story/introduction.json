@@ -26,29 +26,6 @@
                 { "label": "探索する", "next_event": 3 },
                 { "label": "部屋で休む", "next_event": 4 }
             ]
-        },
-        {
-            "id": 3,
-            "text": "廊下で何か音がしました。どうしますか？",
-            "choices": [
-                { "label": "近づく", "next_event": "murderoccurred.json" },
-                { "label": "無視する", "next_event": 4 }
-            ]
-        },
-        {
-            "id": 4,
-            "text": "安全に夜を過ごしました。ゲームは次の章へ進みます。",
-            "choices": []
-        },
-        {
-            "id": 5,
-            "text": "何もせずに時間が過ぎていきます…",
-            "choices": [
-                {
-                    "label": "次へ",
-                    "next_event": 6
-                }
-            ]
         }
     ]
 }
