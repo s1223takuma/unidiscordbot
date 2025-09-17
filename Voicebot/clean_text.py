@@ -10,10 +10,10 @@ word_to_kana = {
     'url': 'ユーアールエル',
     'http': 'エイチティーティーピー',
     'https': 'エイチティーティーピーエス',
-    'ww': 'ワラワラ',
     'ok': 'オーケー',
     'ng': 'エヌジー',
     'pc': 'ピーシー',
+    'ww':'ワラワラ',
     'id': 'アイディー',
     'php': 'ピーエイチピー',
     'sql': 'エスキューエル',
@@ -41,6 +41,17 @@ async def add_word(ctx,word,kana):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump({str(gid): words for gid, words in bs.guild_to_kana.items()}, f, ensure_ascii=False, indent=4)
     await ctx.reply(f'単語を追加しました: {word} -> {kana}')
+
+async def add_words(ctx,kana,words):
+    guild_id = ctx.guild.id
+    for word in words:
+        if guild_id not in bs.guild_to_kana:
+            bs.guild_to_kana[guild_id] = {}
+        bs.guild_to_kana[guild_id][word] = kana
+        path = "data/guild_to_kana.json"
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump({str(gid): word for gid, word in bs.guild_to_kana.items()}, f, ensure_ascii=False, indent=4)
+        await ctx.reply(f'単語を追加しました: {word} -> {kana}')
 
 
 def advanced_convert(ctx,text):

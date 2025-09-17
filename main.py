@@ -14,7 +14,7 @@ import games.filegacha.gacha as gc
 from games.mystery.status import gamestatus as mystery_status
 from automation import pdf_handler, observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
-from Voicebot.clean_text import add_word
+from Voicebot.clean_text import add_word,add_words
 
 TOKEN = getenv('Discord_TOKEN')
 
@@ -132,6 +132,10 @@ async def randomspeaker(ctx):
 @client.command(name="addword",aleiases=['aw'])
 async def addword(ctx,word,kana):
     await add_word(ctx,word=word,kana=kana)
+
+@client.command(name="addwords",aleiases=['aws'])
+async def addwords(ctx,kana,*words):
+    await add_words(ctx,kana,words)
 
 @client.command(name="join")
 async def join(ctx):
