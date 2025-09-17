@@ -1,5 +1,6 @@
 import discord
 import json
+import re
 
 from games.mystery.status import gamestatus
 
@@ -8,6 +9,12 @@ async def select_event(ctx,event_id):
         story_data = json.load(f)
     event = story_data['events'][event_id]
     return event
+
+def introduction_event():
+    with open("games/mystery/event/event.json", "r", encoding="utf-8") as f:
+        event_data = json.load(f)
+        intro_data = event_data["introduction"]
+    return intro_data
 
 async def move_user(ctx, player, channelname):
     category = gamestatus[ctx.guild.id]["world_category"]
@@ -18,7 +25,7 @@ async def move_user(ctx, player, channelname):
         elif isinstance(channel, discord.TextChannel) and channel.name == channelname:
             target_text_channel = channel
     if not target_channel:
-        await ctx.send(f"{channelname} が見つかりませんでした。")
+        await ctx.send(f"{channelname}が見つかりませんでした。")
         return
     try:
         overwrites = target_channel.overwrites
@@ -27,8 +34,12 @@ async def move_user(ctx, player, channelname):
         await target_text_channel.edit(overwrites=overwrites)
         if player.voice and player.voice.channel:
             await player.move_to(target_channel)
+            intro_data = introduction_event()
+            if re.match('客室\d{3}号室',channelname):
+                channelname = "自分の部屋"
+            for message in intro_data[channelname]:
+                await target_text_channel.send(message)
         else:
-            await ctx.send(f"{player.display_name} さん、まずボイスチャンネルに入ってください。")
-        await target_channel.send("test")
+            await ctx.send(f"{player.display_name}さん、まずボイスチャンネルに入ってください。")
     except discord.errors.HTTPException:
-        await ctx.send(f"{player.display_name} を {channelname} に移動できませんでした。")
+        await ctx.send(f"{player.display_name}を{channelname}に移動できませんでした。")
