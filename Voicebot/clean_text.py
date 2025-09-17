@@ -21,7 +21,8 @@ word_to_kana = {
     'css': 'シーエスエス',
     'js': 'ジェーエス',
     'json': 'ジェーソン',
-    '〜': 'ー'
+    '〜': 'ー',
+    "ggrks": "ググレカス"
 }
 
 async def add_word(ctx,word,kana):
