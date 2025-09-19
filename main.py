@@ -23,11 +23,11 @@ is_speaking = False
 
 @client.event
 async def on_message(message):
+    await pdf_handler.open_pdf(message)
     await observemessage.send_observe_message(message)
     if message.author.bot:
         return
     await client.process_commands(message)
-    await pdf_handler.open_pdf(message)
     if message.author.bot:
         return
             
