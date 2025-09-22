@@ -22,7 +22,7 @@ async def open_pdf(message):
                     await message.channel.send(f"# {attachment.filename}")
                 else:
                     cnt += 1
-                    await message.channel.send(f"# {message.content}{cnt}")
+                    await message.channel.send(f"# {message.content}({cnt})")
                 for chunk_index in range(total_chunks):
                     chunk_paths = paths[chunk_index*chunk_size : (chunk_index+1)*chunk_size]
                     files = [discord.File(p) for p in chunk_paths]
