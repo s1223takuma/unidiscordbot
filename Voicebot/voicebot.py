@@ -4,7 +4,7 @@ import asyncio
 import tempfile
 import json
 
-from Voicebot.ttx import DEFAULT_SPEAKER, VoiceVoxTTS
+from Voicebot.tts import DEFAULT_SPEAKER, VoiceVoxTTS
 from Voicebot.clean_text import clean_text
 import bot_setup as bs
 
