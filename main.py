@@ -229,21 +229,28 @@ async def clean_slash(interaction: discord.Interaction):
     del gamestatus[ctx.guild.id]
 
 @tree.command(name="カテゴリー削除", description="カテゴリーとチャンネルを削除します")
-async def clean_category(interaction: discord.Interaction,name:str):
-    if interaction.user.id not in tkn.developer_id:
-        await interaction.response.send_message("あなたはこのコマンドを実行できません。",ephemeral=True)
+async def clean_category(interaction: discord.Interaction, name: str):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "管理者権限を持っていないため、このコマンドは実行できません。",
+            ephemeral=True
+        )
         return
     await interaction.response.defer()
     ctx = await client.get_context(interaction)
-    await dc(ctx,name=name)
+    await dc.delete_category(ctx,name=name)
 
 
-@tree.command(name="sync",description="コマンドを同期します。")
+@tree.command(name="sync", description="コマンドを同期します。")
 async def sync_command(interaction: discord.Interaction):
-    if interaction.user.id not in tkn.developer_id:
-        await interaction.response.send_message("あなたはこのコマンドを実行できません。",ephemeral=True)
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "管理者権限を持っていないため、このコマンドは実行できません。", 
+            ephemeral=True
+        )
         return
     await tree.sync()
-    await interaction.response.send_message("コマンドを同期しました。",ephemeral=True)
+    await interaction.response.send_message("コマンドを同期しました。", ephemeral=True)
+
 
 client.run(TOKEN)
