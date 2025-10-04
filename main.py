@@ -228,7 +228,7 @@ async def clean_slash(interaction: discord.Interaction):
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
 
-@tree.command(name="カテゴリー削除", description="カテゴリーとチャンネルを削除します")
+@tree.command(name="カテゴリ削除", description="カテゴリーとチャンネルを削除します")
 async def clean_category(interaction: discord.Interaction, name: str):
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
