@@ -3,10 +3,10 @@ from os import getenv
 import asyncio
 from collections import deque
 
-from bot_setup import client,tree,guild
+from bot_setup import client,tree
 from games.mystery.setup import setup as mystery_setup
 import tkn
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc
 from games.jinro.setup import setup as jinro_setup
 from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
@@ -192,10 +192,10 @@ async def geturl_slash(interaction: discord.Interaction, day: int = 1):
     await cu.geturl(ctx, day=day)
 
 @tree.command(name="お問い合わせ", description="お問い合わせを送信します")
-async def contact_slash(interaction: discord.Interaction, inquiry: str):
+async def contact_slash(interaction: discord.Interaction, content: str):
     await interaction.response.defer()
     ctx = await client.get_context(interaction)
-    await ct.contact(ctx, inquiry=inquiry)
+    await ct.contact(ctx, inquiry=content)
 
 @tree.command(name="help", description="ヘルプを表示します")
 async def help_slash(interaction: discord.Interaction):
@@ -228,13 +228,22 @@ async def clean_slash(interaction: discord.Interaction):
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
 
+@tree.command(name="カテゴリー削除", description="カテゴリーとチャンネルを削除します")
+async def clean_category(interaction: discord.Interaction,name:str):
+    if interaction.user.id not in tkn.developer_id:
+        await interaction.response.send_message("あなたはこのコマンドを実行できません。",ephemeral=True)
+        return
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await dc(ctx,name=name)
+
 
 @tree.command(name="sync",description="コマンドを同期します。")
 async def sync_command(interaction: discord.Interaction):
     if interaction.user.id not in tkn.developer_id:
         await interaction.response.send_message("あなたはこのコマンドを実行できません。",ephemeral=True)
         return
-    await tree.sync(guild=guild)
+    await tree.sync()
     await interaction.response.send_message("コマンドを同期しました。",ephemeral=True)
 
 client.run(TOKEN)
