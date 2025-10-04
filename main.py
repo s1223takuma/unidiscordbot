@@ -3,7 +3,7 @@ from os import getenv
 import asyncio
 from collections import deque
 
-from bot_setup import client
+from bot_setup import client,tree,guild
 from games.mystery.setup import setup as mystery_setup
 import tkn
 from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm
@@ -85,101 +85,156 @@ async def on_voice_state_update(member, before, after):
                 await vc.auto_leave(before.channel)
                 await vc.auto_join(after.channel)
 
-@client.command()
-async def search(ctx, *, query: str):
+@tree.command(name="search", description="検索を行います",guild=guild)
+async def search_slash(interaction: discord.Interaction, query: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await sr.search(ctx, query=query)
 
-@client.command()
-async def searchnews(ctx, *, query: str):
+@tree.command(name="searchnews", description="ニュース検索を行います",guild=guild)
+async def searchnews_slash(interaction: discord.Interaction, query: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await sr.searchnews(ctx, query=query)
 
-@client.command()
-async def searchimage(ctx, *, query: str):
+@tree.command(name="searchimage", description="画像検索を行います",guild=guild)
+async def searchimage_slash(interaction: discord.Interaction, query: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await sr.searchimage(ctx, query=query)
 
-@client.command(name="random",aliases=['rand'])
-async def randomnum(ctx,min:int,max:int):
-    await rm.randomnum(ctx,min=min,max=max)
+@tree.command(name="random", description="ランダムな数値を生成します",guild=guild)
+async def random_slash(interaction: discord.Interaction, min: int, max: int):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await rm.randomnum(ctx, min=min, max=max)
 
-@client.command(name="speaker",aliases=['sp'])
-async def speaker(ctx, speaker_id: int = None):
+@tree.command(name="speaker", description="話者を設定します",guild=guild)
+async def speaker_slash(interaction: discord.Interaction, speaker_id: int = None):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await set_speaker(ctx, speaker_id=speaker_id)
 
-@client.command(name="adminspeaker",aliases=['asp'])
-async def speaker(ctx, member_id,speaker_id: int = None):
-    await admin_set_speaker(ctx,member_id=member_id,speaker_id=speaker_id)
+@tree.command(name="adminspeaker", description="他のユーザーの話者を設定します",guild=guild)
+async def adminspeaker_slash(interaction: discord.Interaction, member: discord.Member, speaker_id: int = None):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await admin_set_speaker(ctx, member_id=member.id, speaker_id=speaker_id)
 
-@client.command(name="filegacha",aliases=['fg'])
-async def filegacha(ctx):
-    if ctx.guild.id not in tkn.miuchi_ID:
-        await ctx.send("このコマンドは特定のサーバーでのみ使用できます。")
+@tree.command(name="filegacha", description="ファイルガチャを実行します",guild=guild)
+async def filegacha_slash(interaction: discord.Interaction):
+    if interaction.guild.id not in tkn.miuchi_ID:
+        await interaction.response.send_message("このコマンドは特定のサーバーでのみ使用できます。", ephemeral=True)
         return
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await gc.filegacha(ctx)
 
-@client.command(name="checkspeaker",aliases=['csp'])
-async def checkspeaker(ctx):
+@tree.command(name="checkspeaker", description="現在の話者を確認します",guild=guild)
+async def checkspeaker_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await check_speaker(ctx)
 
-@client.command(name="speakers")
-async def speakers(ctx):
+@tree.command(name="speakers", description="利用可能な話者一覧を表示します",guild=guild)
+async def speakers_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await list_speakers(ctx)
 
-@client.command(name="randomspeaker",aliases=['rsp'])
-async def randomspeaker(ctx):
+@tree.command(name="randomspeaker", description="ランダムな話者を設定します",guild=guild)
+async def randomspeaker_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await random_speaker(ctx)
 
-@client.command(name="addword",aleiases=['aw'])
-async def addword(ctx,word,kana):
-    await add_word(ctx,word=word,kana=kana)
+@tree.command(name="addword", description="単語を辞書に追加します",guild=guild)
+async def addword_slash(interaction: discord.Interaction, word: str, kana: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await add_word(ctx, word=word, kana=kana)
 
-@client.command(name="addwords",aleiases=['aws'])
-async def addwords(ctx,kana,*words):
-    await add_words(ctx,kana,words)
+@tree.command(name="addwords", description="複数の単語を辞書に追加します",guild=guild)
+async def addwords_slash(interaction: discord.Interaction, kana: str, words: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    words_list = words.split()
+    await add_words(ctx, kana, words_list)
 
-@client.command(name="join")
-async def join(ctx):
+@tree.command(name="join", description="ボイスチャンネルに参加します",guild=guild)
+async def join_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await vc.join(ctx)
 
-@client.command(name="leave")
-async def leave(ctx):
+@tree.command(name="leave", description="ボイスチャンネルから退出します",guild=guild)
+async def leave_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await vc.leave(ctx)
 
-@client.command(name="監視")
-async def observe(ctx, mode="server"):
+@tree.command(name="監視", description="メッセージを監視します",guild=guild)
+async def observe_slash(interaction: discord.Interaction, mode: str = "server"):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await ob.observe(ctx, mode=mode)
 
-@client.command(name="カテゴリ作成")
-async def create_category(ctx, *, content):
+@tree.command(name="カテゴリ作成", description="カテゴリを作成します",guild=guild)
+async def create_category_slash(interaction: discord.Interaction, content: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await cc.create_category(ctx, content=content)
 
-@client.command(name='url')
-async def geturl(ctx,day=1):
+@tree.command(name="url", description="URLを取得します",guild=guild)
+async def geturl_slash(interaction: discord.Interaction, day: int = 1):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await cu.geturl(ctx, day=day)
 
-@client.command(name="お問い合わせ")
-async def contact(ctx,*,inquiry):
+@tree.command(name="お問い合わせ", description="お問い合わせを送信します",guild=guild)
+async def contact_slash(interaction: discord.Interaction, inquiry: str):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await ct.contact(ctx, inquiry=inquiry)
 
-@client.command(name="h")
-async def help_command(ctx):
+@tree.command(name="help", description="ヘルプを表示します",guild=guild)
+async def help_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await hc.help(ctx)
 
-@client.command(name="人狼")
-async def setup(ctx):
+@tree.command(name="人狼", description="人狼ゲームをセットアップします",guild=guild)
+async def jinro_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
     await jinro_setup(ctx)
 
-@client.command(name="ミステリー",aliases=['m'])
-async def mystery(ctx):
-    await mystery_setup(ctx)
+# @tree.command(name="ミステリー", description="ミステリーゲームをセットアップします",guild=guild)
+# async def mystery_slash(interaction: discord.Interaction):
+#     await interaction.response.defer()
+#     ctx = await client.get_context(interaction)
+#     await mystery_setup(ctx)
 
-@client.command(name="c")
-async def clean(ctx):
-    if ctx.author.id not in tkn.developer_id:
+@tree.command(name="clean", description="ゲームデータをクリーンアップします",guild=guild)
+async def clean_slash(interaction: discord.Interaction):
+    if interaction.user.id not in tkn.developer_id:
+        await interaction.response.send_message("あなたはこのコマンドを実行できません。", ephemeral=True)
         return
+    await interaction.response.defer()
     from games.mystery.status import gamestatus
-    from games.mystery.cleanup import cleanup_category,cleanup_channels
+    from games.mystery.cleanup import cleanup_category, cleanup_channels
+    ctx = await client.get_context(interaction)
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
+
+
+@tree.command(name="sync",description="コマンドを同期します。",guild=guild)
+async def sync_command(interaction: discord.Interaction):
+    if interaction.user.id not in tkn.developer_id:
+        await interaction.response.send_message("あなたはこのコマンドを実行できません。",ephemeral=True)
+        return
+    await tree.sync(guild=guild)
+    await interaction.response.send_message("コマンドを同期しました。",ephemeral=True)
 
 client.run(TOKEN)

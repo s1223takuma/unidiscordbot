@@ -121,7 +121,7 @@ async def day_phase(ctx):
     else:
         await ctx.send("夜が明けました。昨晩の被害者はいませんでした。")
     await ctx.send("議論の時間です。5分間で犯人を探してください。")
-    await asyncio.sleep(180)
+    await asyncio.sleep(180) #議論時間を変更するならここを変更
     await ctx.send("投票開始!各自専用チャンネルで投票してください。")
     tasks = [send_vote_selection(guild_id, user, gamestatus[guild_id]["players"]) for user in gamestatus[guild_id]["players"]]
     await asyncio.gather(*tasks)
@@ -129,7 +129,7 @@ async def day_phase(ctx):
         max_votes = max(gamestatus[guild_id]["vote"].values())
         # await ctx.send(gamestatus[guild_id]['vote'])
         top_candidates = [p for p, v in gamestatus[guild_id]["vote"].items() if v == max_votes]
-        executed = random.choice(top_candidates)  # 同票ならランダム
+        executed = random.choice(top_candidates)
         await ctx.send(f"投票の結果、{executed.mention} が処刑されました。")
         gamestatus[guild_id]["players"].remove(executed)
         gamestatus[guild_id]["dead_players"].append(executed)
