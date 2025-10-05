@@ -12,7 +12,7 @@ from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
 from games.mystery.status import gamestatus as mystery_status
 from automation import pdf_handler, observe as observemessage
-from Voicebot.voicebot import speak_text, read_channels,set_speaker,list_speakers,admin_set_speaker,check_speaker,random_speaker
+from Voicebot.voicebot import speak_text, read_channels,set_speaker,speakers_list,admin_set_speaker,check_speaker,random_speaker
 from Voicebot.clean_text import add_word,add_words
 
 TOKEN = getenv('Discord_TOKEN')
@@ -140,7 +140,7 @@ async def checkspeaker_slash(interaction: discord.Interaction):
 async def speakers_slash(interaction: discord.Interaction):
     await interaction.response.defer()
     ctx = await client.get_context(interaction)
-    await list_speakers(ctx)
+    await speakers_list(ctx)
 
 @tree.command(name="randomspeaker", description="ランダムな話者を設定します")
 async def randomspeaker_slash(interaction: discord.Interaction):
@@ -243,13 +243,15 @@ async def clean_category(interaction: discord.Interaction, name: str):
 
 @tree.command(name="sync", description="コマンドを同期します。")
 async def sync_command(interaction: discord.Interaction):
+    guild = interaction.guild
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "管理者権限を持っていないため、このコマンドは実行できません。", 
             ephemeral=True
         )
         return
-    await tree.sync()
+    tree.clear_commands(guild=guild)
+    await tree.sync(guild=guild)
     await interaction.response.send_message("コマンドを同期しました。", ephemeral=True)
 
 
