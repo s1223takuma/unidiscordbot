@@ -6,7 +6,7 @@ from collections import deque
 from bot_setup import client,tree
 from games.mystery.setup import setup as mystery_setup
 import tkn
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt
 from games.jinro.setup import setup as jinro_setup
 from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
@@ -214,6 +214,12 @@ async def jinro_slash(interaction: discord.Interaction):
 #     await interaction.response.defer()
 #     ctx = await client.get_context(interaction)
 #     await mystery_setup(ctx)
+
+@tree.command(name="mention",description="特定の人をメンションします。")
+async def mention_slash(interaction: discord.Interaction,cnt: int, member: discord.Member):
+    await interaction.response.defer()
+    await interaction.edit_original_response(content="メンションを送信します。")
+    await mt.mention_slash(interaction,cnt,member)
 
 @tree.command(name="clean", description="ゲームデータをクリーンアップします")
 async def clean_slash(interaction: discord.Interaction):
