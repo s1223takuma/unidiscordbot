@@ -198,7 +198,7 @@ async def check_speaker(ctx):
 
 async def speakers_list(ctx):
     view = SpeakerMenu(ctx, speakers)
-    await ctx.send(embed=view.get_embed(0), view=view)
+    await ctx.send(embed=view.get_embed(0), view=view,ephemeral=True)
 
 
 async def say_text(ctx, *, text: str):

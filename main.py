@@ -138,7 +138,7 @@ async def checkspeaker_slash(interaction: discord.Interaction):
 
 @tree.command(name="speakers", description="利用可能な話者一覧を表示します")
 async def speakers_slash(interaction: discord.Interaction):
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
     ctx = await client.get_context(interaction)
     await speakers_list(ctx)
 
@@ -209,11 +209,11 @@ async def jinro_slash(interaction: discord.Interaction):
     ctx = await client.get_context(interaction)
     await jinro_setup(ctx)
 
-# @tree.command(name="ミステリー", description="ミステリーゲームをセットアップします",guild=guild)
-# async def mystery_slash(interaction: discord.Interaction):
-#     await interaction.response.defer()
-#     ctx = await client.get_context(interaction)
-#     await mystery_setup(ctx)
+@tree.command(name="ミステリー", description="ミステリーゲームをセットアップします")
+async def mystery_slash(interaction: discord.Interaction):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await mystery_setup(ctx)
 
 @tree.command(name="mention",description="特定の人をメンションします。")
 async def mention_slash(interaction: discord.Interaction,cnt: int, member: discord.Member):
