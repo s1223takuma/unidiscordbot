@@ -33,4 +33,3 @@ async def open_pdf(message):
                 for path in paths:
                     os.remove(path)
                 os.remove(file_path)
-

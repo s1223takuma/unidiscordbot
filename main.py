@@ -6,7 +6,7 @@ from collections import deque
 from bot_setup import client,tree
 from games.mystery.setup import setup as mystery_setup
 import tkn
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt,create_dashboard as cd
 from games.jinro.setup import setup as jinro_setup
 from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
@@ -233,6 +233,15 @@ async def clean_slash(interaction: discord.Interaction):
     await cleanup_category(ctx)
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
+
+@tree.command(name="dashboard", description="ダッシュボードを作成します")
+async def dashboard_slash(interaction: discord.Interaction):
+    if interaction.user.id not in tkn.developer_id:
+        await interaction.response.send_message("あなたはこのコマンドを実行できません。", ephemeral=True)
+        return
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    await cd.dashboard(ctx)
 
 @tree.command(name="カテゴリ削除", description="カテゴリーとチャンネルを削除します")
 async def clean_category(interaction: discord.Interaction, name: str):
