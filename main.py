@@ -234,7 +234,7 @@ async def clean_slash(interaction: discord.Interaction):
     await cleanup_channels(ctx)
     del gamestatus[ctx.guild.id]
 
-@tree.command(name="dashboard", description="ダッシュボードを作成します")
+@tree.command(name="pdf-dashboard", description="ダッシュボードを作成します")
 async def dashboard_slash(interaction: discord.Interaction):
     if interaction.user.id not in tkn.developer_id:
         await interaction.response.send_message("あなたはこのコマンドを実行できません。", ephemeral=True)
