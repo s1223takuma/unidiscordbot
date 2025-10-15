@@ -27,7 +27,7 @@ async def open_pdf(message):
     dashboard_message_id = dashboard_id.get("dashboard_ID") if dashboard_id else None
     category_id = dashboard_id.get("category_ID") if dashboard_id else None
     if not dashboard_message_id:
-        await message.channel.send("⚠️ このサーバーのダッシュボードが登録されていません。")
+        await message.channel.send("このサーバーのダッシュボードが登録されていません。\n```/pdf-dashboard``` を実行して登録してください。")
         return
 
     for attachment in message.attachments:
