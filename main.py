@@ -38,8 +38,6 @@ async def on_message(message):
     if message.channel.id != read_channels[guild_id]:
         return
         
-    if message.content.startswith('!'):
-        return
     
     message_queue.append((message, message.content, message.author.id))
     
@@ -84,6 +82,15 @@ async def on_voice_state_update(member, before, after):
             if before.channel and len(before.channel.members) == 1 and after.channel not in world_category.channels and after.channel not in wolf_category.channels:
                 await vc.auto_leave(before.channel)
                 await vc.auto_join(after.channel)
+
+@client.event
+async def on_guild_channel_delete(channel):
+    if channel.name.startswith("pdf-"):
+        pdf_name = channel.name.replace("pdf-", "").replace("-", " ")
+        success = await pdf_handler.remove_pdf_link(channel.guild, pdf_name)
+        if success:
+            print(f"✅ {pdf_name} のリンクを削除しました。")
+
 
 @tree.command(name="search", description="検索を行います")
 async def search_slash(interaction: discord.Interaction, query: str):
@@ -160,6 +167,8 @@ async def addwords_slash(interaction: discord.Interaction, kana: str, words: str
     ctx = await client.get_context(interaction)
     words_list = words.split()
     await add_words(ctx, kana, words_list)
+
+
 
 @tree.command(name="join", description="ボイスチャンネルに参加します")
 async def join_slash(interaction: discord.Interaction):
