@@ -56,32 +56,32 @@ async def process_queue():
         await speak_text(message, content, author_id)
     is_speaking = False
 
-@client.event
-async def on_voice_state_update(member, before, after):
-    if before.channel is None and after.channel is not None:
-        try:
-            await vc.auto_join(after.channel)
-            if not member.bot:
-                await speak_text(after.channel, f"{member.display_name}さんこんにちは。私は読み上げbotです。", 0)
-        except discord.errors.ConnectionClosed:
-            print("⚠️ ボイス接続が切断されました。再試行します…")
-            await asyncio.sleep(5)
-            try:
-                await vc.auto_join(after.channel)
-            except Exception as e:
-                print(f"再接続に失敗: {e}")
-    elif before.channel is not None and after.channel is None:
-        if before.channel and len(before.channel.members) == 1:
-            await vc.auto_leave(before.channel)
-        elif not member.bot:
-            await speak_text(before.channel, f"{member.display_name}さんが退出しました", 0)
-    elif before.channel != after.channel:
-        if not member.bot:
-            world_category = mystery_status.get(member.guild.id, {}).get("world_category")
-            wolf_category = jinro_status.get(member.guild.id,{}).get("category")
-            if before.channel and len(before.channel.members) == 1 and after.channel not in world_category.channels and after.channel not in wolf_category.channels:
-                await vc.auto_leave(before.channel)
-                await vc.auto_join(after.channel)
+# @client.event
+# async def on_voice_state_update(member, before, after):
+#     if before.channel is None and after.channel is not None:
+#         try:
+#             await vc.auto_join(after.channel)
+#             if not member.bot:
+#                 await speak_text(after.channel, f"{member.display_name}さんこんにちは。私は読み上げbotです。", 0)
+#         except discord.errors.ConnectionClosed:
+#             print("⚠️ ボイス接続が切断されました。再試行します…")
+#             await asyncio.sleep(5)
+#             try:
+#                 await vc.auto_join(after.channel)
+#             except Exception as e:
+#                 print(f"再接続に失敗: {e}")
+#     elif before.channel is not None and after.channel is None:
+#         if before.channel and len(before.channel.members) == 1:
+#             await vc.auto_leave(before.channel)
+#         elif not member.bot:
+#             await speak_text(before.channel, f"{member.display_name}さんが退出しました", 0)
+#     elif before.channel != after.channel:
+#         if not member.bot:
+#             world_category = mystery_status.get(member.guild.id, {}).get("world_category")
+#             wolf_category = jinro_status.get(member.guild.id,{}).get("category")
+#             if before.channel and len(before.channel.members) == 1 and after.channel not in world_category.channels and after.channel not in wolf_category.channels:
+#                 await vc.auto_leave(before.channel)
+#                 await vc.auto_join(after.channel)
 
 @client.event
 async def on_guild_channel_delete(channel):
