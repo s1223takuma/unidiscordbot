@@ -84,8 +84,8 @@ async def open_pdf(message):
 
         if dashboard_message:
             embed = dashboard_message.embeds[0] if dashboard_message.embeds else discord.Embed(
-                title="📂 PDFリンクまとめダッシュボード",
-                description="",
+                title="📂 PDFリンクまとめダッシュボード(最大25件まで)",
+                description=f"{guild.name} に送信されたPDF一覧です",
                 color=discord.Color.blue()
             )
 
@@ -102,21 +102,17 @@ async def open_pdf(message):
 async def remove_pdf_link(guild, pdf_name):
     if not os.path.exists(DATA_PATH):
         return False
-
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         try:
             dashboard_data = json.load(f)
         except json.JSONDecodeError:
             dashboard_data = {}
-
     guild_data = dashboard_data.get(str(guild.id))
     if not guild_data:
         return False
-
     dashboard_message_id = guild_data.get("dashboard_ID")
     if not dashboard_message_id:
         return False
-
     dashboard_message = None
     for c in guild.text_channels:
         try:
@@ -125,18 +121,13 @@ async def remove_pdf_link(guild, pdf_name):
             break
         except:
             continue
-
     if not dashboard_message or not dashboard_message.embeds:
         return False
-
     embed = dashboard_message.embeds[0]
     lines = (embed.description or "").splitlines()
-
     new_lines = [line for line in lines if pdf_name not in line]
-
     if len(new_lines) == len(lines):
         return False
-
     embed.description = "\n".join(new_lines)
     await dashboard_message.edit(embed=embed)
     return True

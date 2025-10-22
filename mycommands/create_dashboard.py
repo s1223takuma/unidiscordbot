@@ -7,7 +7,7 @@ import os
 async def dashboard(ctx):
     guild = ctx.guild
     embed = discord.Embed(
-        title="PDFリンクまとめダッシュボード",
+        title="PDFリンクまとめダッシュボード(最大25件まで)",
         description=f"{guild.name} に送信されたPDF一覧です",
         color=discord.Color.blue(),
         timestamp=datetime.datetime.now()
