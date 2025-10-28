@@ -1,5 +1,6 @@
 tkn.py
 test.py
+think.md
 data/*.json
 __pycache__/
 automation/__pycache__/
