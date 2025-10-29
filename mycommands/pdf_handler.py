@@ -96,7 +96,6 @@ async def open_pdf(message):
 
             embed.description = updated_desc
             await dashboard_message.edit(embed=embed)
-            await message.delete()
 
 
 async def remove_pdf_link(guild, pdf_name):

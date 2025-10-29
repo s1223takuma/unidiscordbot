@@ -6,12 +6,12 @@ from collections import deque
 from bot_setup import client,tree
 from games.mystery.setup import setup as mystery_setup
 import tkn
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt,create_dashboard as cd
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, pdf_handler, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt,create_dashboard as cd
 from games.jinro.setup import setup as jinro_setup
 from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
 from games.mystery.status import gamestatus as mystery_status
-from automation import pdf_handler, observe as observemessage
+from automation import observe as observemessage
 from Voicebot.voicebot import speak_text, read_channels,set_speaker,speakers_list,admin_set_speaker,check_speaker,random_speaker
 from Voicebot.clean_text import add_word,add_words
 
@@ -22,7 +22,6 @@ is_speaking = False
 
 @client.event
 async def on_message(message):
-    await pdf_handler.open_pdf(message)
     await observemessage.send_observe_message(message)
     if message.author.bot:
         return
@@ -91,6 +90,12 @@ async def on_guild_channel_delete(channel):
         if success:
             print(f"✅ {pdf_name} のリンクを削除しました。")
 
+@tree.command(name="open_pdf", description="PDFファイルを画像化します")
+async def open_pdf_slash(interaction: discord.Interaction, file: discord.Attachment):
+    await interaction.response.defer()
+    ctx = await client.get_context(interaction)
+    ctx.message.attachments.append(file)
+    await pdf_handler.open_pdf(ctx.message)
 
 @tree.command(name="search", description="検索を行います")
 async def search_slash(interaction: discord.Interaction, query: str):
