@@ -90,8 +90,8 @@ async def open_pdf(message):
             )
 
             desc = embed.description or ""
-            filename = attachment.filename if message.content == "" else message.content
-            new_line = f"📘 [{filename}](https://discord.com/channels/{guild.id}/{channel.id})"
+            filename = attachment.filename[:-4] if message.content == "" else message.content
+            new_line = f"[{filename.lower()}](https://discord.com/channels/{guild.id}/{channel.id})"
             updated_desc = desc + ("\n" if desc else "") + new_line
 
             embed.description = updated_desc
@@ -118,13 +118,16 @@ async def remove_pdf_link(guild, pdf_name):
             m = await c.fetch_message(dashboard_message_id)
             dashboard_message = m
             break
-        except:
-            continue
+        except Exception as e:
+            print(f"⚠️ {c.name} でメッセージ取得失敗: {e}")
     if not dashboard_message or not dashboard_message.embeds:
         return False
+    else:
+        print(f"✅ ダッシュボードメッセージを取得しました: {dashboard_message.id}")
     embed = dashboard_message.embeds[0]
     lines = (embed.description or "").splitlines()
-    new_lines = [line for line in lines if pdf_name not in line]
+    print(lines)
+    new_lines = [line for line in lines if f"{pdf_name}" not in line]
     if len(new_lines) == len(lines):
         return False
     embed.description = "\n".join(new_lines)

@@ -86,15 +86,17 @@ async def process_queue():
 async def on_guild_channel_delete(channel):
     if channel.name.startswith("pdf-"):
         pdf_name = channel.name.replace("pdf-", "").replace("-", " ")
+        print(pdf_name)
         success = await pdf_handler.remove_pdf_link(channel.guild, pdf_name)
         if success:
             print(f"✅ {pdf_name} のリンクを削除しました。")
+        else:
+            print(f"⚠️ {pdf_name} のリンク削除に失敗しました。")
 
 @tree.command(name="open_pdf", description="PDFファイルを画像化します")
 async def open_pdf_slash(interaction: discord.Interaction, file: discord.Attachment):
-    await interaction.response.defer()
     ctx = await client.get_context(interaction)
-    ctx.message.attachments.append(file)
+    ctx.message.attachments=[file]
     await pdf_handler.open_pdf(ctx.message)
 
 @tree.command(name="search", description="検索を行います")
