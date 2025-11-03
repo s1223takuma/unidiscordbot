@@ -6,7 +6,7 @@ import json
 
 DATA_PATH = "data/dashboard.json"
 
-async def open_pdf(message, tag_list=None):
+async def open_pdf(message, tag_list=None, filename=None):
     if not message.attachments:
         return
 
@@ -30,12 +30,12 @@ async def open_pdf(message, tag_list=None):
 
     dashboard_message_id = dashboard_id.get("dashboard_ID")
     category_id = dashboard_id.get("category_ID")
-    tags_data = dashboard_id.setdefault("tags", {})  # ← ここで dict 確実化！
+    tags_data = dashboard_id.setdefault("tags", {})
 
     for attachment in message.attachments:
         if not attachment.filename.endswith(".pdf"):
             continue
-        base_name = message.content if message.content else os.path.splitext(attachment.filename)[0]
+        base_name = filename if filename != None else os.path.splitext(attachment.filename)[0]
         channel_name = f"pdf-{base_name}".replace(" ", "-").lower()
 
         # チャンネル作成
@@ -46,7 +46,7 @@ async def open_pdf(message, tag_list=None):
             await message.reply("カテゴリーが見つかりません。開発者にお問い合わせください。")
             return
 
-        await channel.send(f"# {attachment.filename}")
+        await channel.send(f"# {base_name}")
 
         file_path = f"./{attachment.filename}"
         await attachment.save(file_path)
@@ -69,23 +69,23 @@ async def open_pdf(message, tag_list=None):
                 files=files
             )
 
-        # ✅ タグ登録処理
         if tag_list:
             for tag in tag_list:
                 tag_entry = tags_data.setdefault(tag, [])
                 if channel.id not in tag_entry:
                     tag_entry.append(channel.id)
+        else:
+            tag_entry = tags_data.setdefault("タグ無し", [])
+            if channel.id not in tag_entry:
+                tag_entry.append(channel.id)
 
-        # 保存
         with open(DATA_PATH, "w", encoding="utf-8") as f:
             json.dump(dashboard_data, f, indent=4, ensure_ascii=False)
 
-        # 後処理
         for path in paths:
             os.remove(path)
         os.remove(file_path)
 
-        # ✅ ダッシュボード更新
         dashboard_message = None
         for c in guild.text_channels:
             try:
@@ -103,7 +103,7 @@ async def open_pdf(message, tag_list=None):
             )
 
             desc = embed.description or ""
-            filename = attachment.filename[:-4] if message.content == "" else message.content
+            filename = attachment.filename[:-4] if filename == None else filename
             new_line = f"[{filename.lower()}](https://discord.com/channels/{guild.id}/{channel.id})"
             embed.description = desc + ("\n" if desc else "") + new_line
             await dashboard_message.edit(embed=embed)
