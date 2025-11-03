@@ -23,6 +23,6 @@ async def dashboard(ctx):
         return
     category = await ctx.guild.create_category("PDF一覧")
     message = await ctx.send(embed=embed)
-    data[str(guild.id)] = {"dashboard_ID":message.id,"category_ID":category.id}
+    data[str(guild.id)] = {"dashboard_ID":message.id,"category_ID":category.id,"tags":{}}
     with open(data_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)

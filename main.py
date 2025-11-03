@@ -94,10 +94,10 @@ async def on_guild_channel_delete(channel):
             print(f"⚠️ {pdf_name} のリンク削除に失敗しました。")
 
 @tree.command(name="open_pdf", description="PDFファイルを画像化します")
-async def open_pdf_slash(interaction: discord.Interaction, file: discord.Attachment):
+async def open_pdf_slash(interaction: discord.Interaction, file: discord.Attachment, tags: str = ""):
+    tag_list = tags.split() if tags else []
     ctx = await client.get_context(interaction)
-    ctx.message.attachments=[file]
-    await pdf_handler.open_pdf(ctx.message)
+    await pdf_handler.open_pdf(ctx.message, tag_list=tag_list)
 
 @tree.command(name="search", description="検索を行います")
 async def search_slash(interaction: discord.Interaction, query: str):
