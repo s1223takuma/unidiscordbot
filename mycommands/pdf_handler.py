@@ -109,7 +109,6 @@ async def open_pdf(message, tag_list=None, filename=None):
             await dashboard_message.edit(embed=embed)
 
 
-
 async def remove_pdf_link(guild, pdf_name):
     if not os.path.exists(DATA_PATH):
         return False
@@ -138,10 +137,33 @@ async def remove_pdf_link(guild, pdf_name):
         print(f"✅ ダッシュボードメッセージを取得しました: {dashboard_message.id}")
     embed = dashboard_message.embeds[0]
     lines = (embed.description or "").splitlines()
-    print(lines)
     new_lines = [line for line in lines if f"{pdf_name}" not in line]
     if len(new_lines) == len(lines):
+        print("⚠️ 一致するPDF名が見つかりませんでした")
         return False
     embed.description = "\n".join(new_lines)
     await dashboard_message.edit(embed=embed)
+    print(f"🗑️ Embedから {pdf_name} を削除しました")
+    tags = guild_data.get("tags", {})
+    removed_channels = []
+    for tag, channel_ids in list(tags.items()):
+        new_ids = []
+        for ch_id in channel_ids:
+            ch = guild.get_channel(ch_id)
+            if not ch:
+                continue
+            if pdf_name.lower() in ch.name.lower():
+                print(f"タグ「{tag}」からチャンネル {ch.name} を削除")
+                removed_channels.append(ch_id)
+            else:
+                new_ids.append(ch_id)
+        if new_ids:
+            tags[tag] = new_ids
+        else:
+            print(f"タグ「{tag}」が空になったので削除")
+            del tags[tag]
+    guild_data["tags"] = tags
+    dashboard_data[str(guild.id)] = guild_data
+    with open(DATA_PATH, "w", encoding="utf-8") as f:
+        json.dump(dashboard_data, f, ensure_ascii=False, indent=4)
     return True
