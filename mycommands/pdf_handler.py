@@ -45,6 +45,9 @@ async def open_pdf(message, tag_list=None, filename=None):
         else:
             await message.reply("カテゴリーが見つかりません。開発者にお問い合わせください。")
             return
+        
+        everyone_role = guild.default_role
+        await channel.set_permissions(everyone_role, view_channel=False)
 
         await channel.send(f"# {base_name}")
 
@@ -73,11 +76,11 @@ async def open_pdf(message, tag_list=None, filename=None):
             for tag in tag_list:
                 tag_entry = tags_data.setdefault(tag, [])
                 if channel.id not in tag_entry:
-                    tag_entry.append(channel.id)
+                    tag_entry.append([base_name,channel.id])
         else:
             tag_entry = tags_data.setdefault("タグ無し", [])
             if channel.id not in tag_entry:
-                tag_entry.append(channel.id)
+                tag_entry.append([base_name,channel.id])
 
         with open(DATA_PATH, "w", encoding="utf-8") as f:
             json.dump(dashboard_data, f, indent=4, ensure_ascii=False)
@@ -107,6 +110,7 @@ async def open_pdf(message, tag_list=None, filename=None):
             new_line = f"[{filename.lower()}](https://discord.com/channels/{guild.id}/{channel.id})"
             embed.description = desc + ("\n" if desc else "") + new_line
             await dashboard_message.edit(embed=embed)
+            await channel.set_permissions(everyone_role, view_channel=True)
 
 
 async def remove_pdf_link(guild, pdf_name):
@@ -149,7 +153,7 @@ async def remove_pdf_link(guild, pdf_name):
     for tag, channel_ids in list(tags.items()):
         new_ids = []
         for ch_id in channel_ids:
-            ch = guild.get_channel(ch_id)
+            ch = guild.get_channel(ch_id[1])
             if not ch:
                 continue
             if pdf_name.lower() in ch.name.lower():
