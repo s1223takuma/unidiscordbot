@@ -50,6 +50,7 @@ async def open_pdf(message, tag_list=None, filename=None):
         await channel.set_permissions(everyone_role, view_channel=False)
 
         await channel.send(f"# {base_name}")
+        await channel.send(f"タグ: {', '.join(tag_list) if tag_list else 'タグ無し'}")
 
         file_path = f"./{attachment.filename}"
         await attachment.save(file_path)

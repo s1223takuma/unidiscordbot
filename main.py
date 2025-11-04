@@ -25,7 +25,8 @@ async def on_message(message):
     await observemessage.send_observe_message(message)
     if message.author.bot:
         return
-    await st.search(ctx=await client.get_context(message), query=message.content)
+    if message.content.startswith("bot"):
+        await st.search(ctx=await client.get_context(message), query=message.content[3:].strip())
     await client.process_commands(message)
     if message.author.bot:
         return

@@ -26,7 +26,7 @@ def find_tag(user_input: str, tags: dict):
 
     matched = []
     for name, score, _ in results:
-        if score >= 65:
+        if score >= 50:
             for title, tag in all_titles:
                 if title == name:
                     matched.append((tag, title))
