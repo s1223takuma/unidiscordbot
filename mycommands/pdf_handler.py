@@ -4,7 +4,7 @@ from pdf2image import convert_from_path
 from math import ceil
 import json
 
-DATA_PATH = "data/dashboard.json"
+DATA_PATH = "data/pdfdashboard.json"
 
 async def open_pdf(message, tag_list=None, filename=None):
     if not message.attachments:

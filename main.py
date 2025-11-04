@@ -28,28 +28,19 @@ async def on_message(message):
     await client.process_commands(message)
     if message.author.bot:
         return
-            
     guild_id = message.guild.id if message.guild else None
-    
     if guild_id not in read_channels:
         return
-        
     if message.channel.id != read_channels[guild_id]:
         return
-        
-    
     message_queue.append((message, message.content, message.author.id))
-    
     await process_queue()
 
 async def process_queue():
     global is_speaking
-    
     if is_speaking or not message_queue:
         return
-        
     is_speaking = True
-    
     while message_queue:
         message, content, author_id = message_queue.popleft()
         await speak_text(message, content, author_id)

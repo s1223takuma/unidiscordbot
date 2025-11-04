@@ -12,7 +12,7 @@ async def dashboard(ctx):
         color=discord.Color.blue(),
         timestamp=datetime.datetime.now()
     )
-    data_path = "data/dashboard.json"
+    data_path = "data/pdfdashboard.json"
     if os.path.exists(data_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -26,3 +26,4 @@ async def dashboard(ctx):
     data[str(guild.id)] = {"dashboard_ID":message.id,"category_ID":category.id,"tags":{}}
     with open(data_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
