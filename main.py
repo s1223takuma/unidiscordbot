@@ -6,7 +6,7 @@ from collections import deque
 from bot_setup import client,tree
 from games.mystery.setup import setup as mystery_setup
 import tkn
-from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, pdf_handler, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt,create_dashboard as cd
+from mycommands import category_manager as cc, help as hc, create_url as cu ,contact as ct, observe_manager as ob, pdf_handler, search as sr,voice as vc,randomnum as rm, delete_category as dc,mention as mt,create_dashboard as cd,search_tag as st
 from games.jinro.setup import setup as jinro_setup
 from games.jinro.status import gamestatus as jinro_status
 import games.filegacha.gacha as gc
@@ -25,6 +25,7 @@ async def on_message(message):
     await observemessage.send_observe_message(message)
     if message.author.bot:
         return
+    await st.search(ctx=await client.get_context(message), query=message.content)
     await client.process_commands(message)
     if message.author.bot:
         return
