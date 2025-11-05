@@ -3,7 +3,7 @@ from rapidfuzz import process, fuzz
 import json
 
 SYNONYMS = {
-    "大学全般": ["大学", "単位", "授業"],
+    "大学全般": ["単位", "授業"],
     "教職関連": ["教育", "教師", "教育実習"],
     "資格試験": ["資格", "試験", "検定"],
 }
@@ -11,25 +11,28 @@ SYNONYMS = {
 def find_tag(user_input: str, tags: dict):
     for tag, keywords in SYNONYMS.items():
         if any(k in user_input for k in keywords):
-            print(f"[synonym hit] '{user_input}' → {tag}")
-            if tag in tags:
-                return [(tag, title) for title, _ in tags[tag]]
-            return [(tag, None)]
+            return [(tag, title) for title, _ in tags.get(tag, [])] or [(tag, None)]
+    tag_results = process.extract(user_input, list(tags.keys()), scorer=fuzz.partial_ratio)
+    tag_matches = [tag for tag, score, _ in tag_results if score >= 65]
+    if tag_matches:
+        matched = []
+        for tag in tag_matches:
+            matched.extend([(tag, title) for title, _ in tags[tag]])
+        print(matched)
+        return matched
     all_titles = []
     for tag, items in tags.items():
         for title, _ in items:
             all_titles.append((title, tag))
-    results = process.extract(user_input, [t[0] for t in all_titles], scorer=fuzz.partial_ratio)
-    print(f"[fuzz results] {results}")
+    title_results = process.extract(user_input, [t[0] for t in all_titles], scorer=fuzz.partial_ratio)
     matched = []
-    for name, score, _ in results:
-        if score >= 50:
+    for name, score, _ in title_results:
+        if score >= 65:
             for title, tag in all_titles:
                 if title == name:
                     matched.append((tag, title))
-    if matched:
-        return matched
-    return None
+    return matched or None
+
 
 async def search(ctx, *, query: str):
     DATA_PATH = "data/pdfdashboard.json"
@@ -47,21 +50,21 @@ async def search(ctx, *, query: str):
     if not result:
         await ctx.send("一致する資料が見つかりませんでした。")
         return
+    print(result)
     embed = discord.Embed(
         title=f"検索結果: {query}",
         color=discord.Color.blurple()
     )
-    x = []
+    Duplication_manager = []
     for tag, title in result:
         channel_id = next((mid for t, mid in tags[tag] if t == title), None)
         if channel_id:
             url = f"https://discord.com/channels/{ctx.guild.id}/{channel_id}"
-            if url not in x:
+            if url not in Duplication_manager:
                 embed.add_field(
                     name=f"{url}",
                     value=f"タグ: {tag}",
                     inline=False
                 )
-                x.append(url)
-        print(x)
+                Duplication_manager.append(url)
     await ctx.send(embed=embed)
