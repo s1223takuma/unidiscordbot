@@ -82,9 +82,9 @@ async def on_guild_channel_delete(channel):
         print(pdf_name)
         success = await pdf_handler.remove_pdf_link(channel.guild, pdf_name)
         if success:
-            print(f"✅ {pdf_name} のリンクを削除しました。")
+            print(f"{pdf_name} のリンクを削除しました。")
         else:
-            print(f"⚠️ {pdf_name} のリンク削除に失敗しました。")
+            print(f"{pdf_name} のリンク削除に失敗しました。")
 
 @tree.command(name="open_pdf", description="PDFファイルを画像化します")
 async def open_pdf_slash(interaction: discord.Interaction, file: discord.Attachment, tags: str = "",filename: str = None):
